@@ -1,1 +1,62 @@
-/* You can add global styles to this file, and also import other style files */
+html, body {
+	width: 100vw;
+	/* height: 100vh; */
+	margin: 0;
+	padding: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+	background: #101522;
+	color: #e0e6f6;
+	font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+}
+
+/* Accent gradient for buttons and highlights */
+.accent-gradient {
+	background: linear-gradient(90deg, #00c6fb 0%, #7f53ac 100%);
+	color: #fff;
+	border: none;
+	border-radius: 12px;
+	font-weight: 600;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+
+/* Card style */
+.card {
+	background: rgba(20, 24, 40, 0.95);
+	border-radius: 18px;
+	box-shadow: 0 6px 22px rgba(0,0,0,0.22);
+	padding: 24px;
+	color: #e0e6f6;
+}
+
+input, textarea, select {
+	background: #181c2b;
+	color: #e0e6f6;
+	border: 2px solid #232a45;
+	border-radius: 10px;
+	padding: 10px 14px;
+	font-size: 1rem;
+	margin-bottom: 8px;
+}
+input:focus, textarea:focus, select:focus {
+	outline: none;
+	border-color: #7f53ac;
+	box-shadow: 0 0 0 2px #7f53ac44;
+}
+
+button {
+	background: linear-gradient(90deg, #00c6fb 0%, #7f53ac 100%);
+	color: #fff;
+	border: none;
+	border-radius: 12px;
+	font-weight: 600;
+	padding: 10px 20px;
+	cursor: pointer;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+	transition: background 0.2s, box-shadow 0.2s;
+}
+button:disabled {
+	background: #232a45;
+	color: #888;
+	cursor: not-allowed;
+}

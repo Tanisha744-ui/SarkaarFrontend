@@ -1,0 +1,46 @@
+.timer-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding: 12px;
+	background: rgba(255,255,255,0.95);
+	border-radius: 12px;
+	box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+	width: 180px;
+	border: 2px solid #ffb347;
+}
+
+.time-display {
+	font-size: 1.6rem;
+	font-weight: 700;
+	color: #222;
+}
+
+.controls {
+	display: flex;
+	gap: 8px;
+}
+
+.controls button {
+	padding: 8px 12px;
+	border-radius: 6px;
+	border: none;
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.controls button.start {
+	background: #4caf50;
+	color: white;
+}
+
+.controls button.start:disabled {
+	background: #9ccc9c;
+	cursor: not-allowed;
+}
+
+.controls button.restart {
+	background: #f44336;
+	color: white;
+}

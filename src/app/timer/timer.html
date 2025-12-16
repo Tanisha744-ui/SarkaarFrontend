@@ -1,0 +1,7 @@
+<div class="timer-container">
+	<div class="time-display">{{ formatTime(remaining) }}</div>
+	<div class="controls">
+		<button class="start" (click)="start()" [disabled]="running">Start</button>
+		<button class="restart" (click)="restart()">Restart</button>
+	</div>
+</div>

@@ -1,0 +1,41 @@
+<div class="team-card"
+    [ngClass]="{'active': isActive, 'correct': resultState === 'correct', 'wrong': resultState === 'wrong'}">
+    <div class="card-header">
+        <h2>{{ team.name }}</h2>
+    </div>
+    <div class="card-body">
+        <div class="balance-section">
+            <p class="balance-label">Balance:</p>
+            <p class="balance-amount">₹{{ team.balance }}</p>
+        </div>
+
+        <div class="current-bid" *ngIf="team.currentBid !== undefined">
+            <p class="bid-label">Current Bid:</p>
+            <p class="bid-amount">₹{{ team.currentBid }}</p>
+        </div>
+
+        <div class="bid-section">
+            <input type="number" [(ngModel)]="currentBidAmount" [max]="team.balance" min="0" step="1" class="bid-input"
+                [disabled]="isLocked" placeholder="Enter bid amount" title="Bid amount (maximum {{ team.balance }})">
+                <button (click)="onBidSubmit(currentBidAmount ?? 0)" [disabled]="isLocked || isBidExceedingBalance()"
+                style="margin-left:8px; padding:6px 12px; border-radius:8px; background:#ffb347; color:#222; font-weight:600; border:none; cursor:pointer;">Submit
+                Bid</button>
+            <small *ngIf="isBidExceedingBalance()" style="color: #ff4136; font-size: 0.85em; margin-top: 4px;">
+                Maximum bid: ₹{{ team.balance }}
+            </small>
+        </div>
+
+        <!-- Answer buttons: visible only when bids are locked and this is the active team(team with maximum bid) -->
+        <div class="answer-section" *ngIf="isLocked && isActive">
+            <p style="margin:0 0 8px 0; font-weight:700;">Answer?</p>
+            <div style="display:flex; gap:8px;">
+                <button class="tick" (click)="onAnswer(true)" [disabled]="!answerEnabled">✔️</button>
+                <button class="cross" (click)="onAnswer(false)" [disabled]="!answerEnabled">✖️</button>
+            </div>
+            <small *ngIf="!answerEnabled" style="color:#666; margin-top:6px; display:block;">Start the timer to enable
+                answers</small>
+        </div>
+
+
+    </div>
+</div>

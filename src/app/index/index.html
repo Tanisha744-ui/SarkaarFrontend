@@ -1,0 +1,47 @@
+<div class="index-container">
+  <header class="header">
+    <h1>🎮 Game Zone!</h1>
+    <div class="user-menu">
+  <span class="username">Hi, {{ username }}!</span>
+  <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </header>
+  
+  <main class="main-content">
+    <div class="dashboard-welcome">
+      <h2>Choose Your Game! 🎲</h2>
+      <p>Pick any game below and start playing! 🚀</p>
+    </div>
+
+    <div class="games-grid">
+      <!-- Sarkaar Game Card -->
+      <div class="game-card">
+        <div class="game-icon">
+          <i class="fas fa-crown"></i>
+        </div>
+        <h3>Sarkaar</h3>
+        <p>Bid, Answer, Win! Test your knowledge and strategy.</p>
+        <a routerLink="/dashboard" class="play-btn">Play Now! 🎯</a>
+      </div>
+
+      <!-- Placeholder for future games -->
+      <div class="game-card">
+        <div class="game-icon">
+          <i class="fas fa-crown"></i>
+        </div>
+        <h3>Imposter Game</h3>
+        <p>Find the imposter among the players!</p>
+        <a routerLink="/imposter-game" class="play-btn">Play Now! 🕵️‍♂️</a>
+      </div>
+
+      <div class="game-card coming-soon">
+        <div class="game-icon">
+          <i class="fas fa-dice"></i>
+        </div>
+        <h3>Coming Soon</h3>
+        <p>Another awesome game coming up!</p>
+        <button class="play-btn" disabled>Stay Tuned! 🎲</button>
+      </div>
+    </div>
+  </main>
+</div>

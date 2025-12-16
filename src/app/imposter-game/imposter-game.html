@@ -1,0 +1,132 @@
+<!-- ================= STEP 0 : PLAYER COUNT ================= -->
+<div *ngIf="step === 0">
+  <h2>How many players?</h2>
+  <input type="number" [(ngModel)]="playerCount" min="3" />
+  <button (click)="setPlayerCount()">Next</button>
+</div>
+
+
+<!-- ================= STEP 1 : PLAYER NAMES ================= -->
+<div *ngIf="step === 1">
+  <h2>Enter Player {{ currentPlayerIndex + 1 }} Name</h2>
+
+  <input [(ngModel)]="tempName" placeholder="Player name" />
+  <button (click)="addPlayerName()">Add</button>
+
+  <div *ngIf="playerNames.length > 0">
+    <h4>Players Added:</h4>
+    <ul>
+      <li *ngFor="let n of playerNames">{{ n }}</li>
+    </ul>
+  </div>
+
+  <button *ngIf="currentPlayerIndex >= playerCount"
+          (click)="createGame()">
+    Create Game
+  </button>
+</div>
+
+
+<!-- ================= STEP 3 : WAITING ROOM ================= -->
+<div *ngIf="step === 3">
+  <h2>Waiting Room</h2>
+  <p><b>Game ID:</b> {{ gameId }}</p>
+  <button (click)="startGame()">Start Game</button>
+</div>
+
+
+<!-- ================= STEP 4 : CLUE PHASE ================= -->
+<div *ngIf="step === 4">
+  <h2>Clue Phase</h2>
+
+  <!-- ===== WHEN CLUE PHASE IS ACTIVE ===== -->
+  <div *ngIf="!cluePhaseComplete">
+
+    <!-- ===== CURRENT PLAYER TURN ===== -->
+    <div *ngIf="isMyClueTurn()">
+      <h3>Your Turn</h3>
+
+      <p><b>Your Word:</b> {{ word }}</p>
+
+      <p *ngIf="isImposter" style="color:red;font-weight:bold">
+        You are the IMPOSTER – try to guess the word!
+      </p>
+
+      <p *ngIf="!isImposter" style="color:green;font-weight:bold">
+        You are NOT the imposter
+      </p>
+
+      <input [(ngModel)]="myClue" placeholder="Enter your clue" />
+      <button (click)="submitClue()">Submit Clue</button>
+    </div>
+
+    <!-- ===== NOT CURRENT PLAYER ===== -->
+    <div *ngIf="!isMyClueTurn()">
+      <h3>Waiting for {{ players[clueTurnIndex]?.name }}</h3>
+
+      <p style="color:orange;font-weight:bold">
+        👉 Please pass the device to
+        {{ players[clueTurnIndex]?.name }}
+      </p>
+
+      <button (click)="switchToCurrentTurnPlayer()">
+        I'm {{ players[clueTurnIndex]?.name }}
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ===== ALL CLUES SHOWN ===== -->
+  <div *ngIf="cluePhaseComplete">
+    <h3>All Clues Submitted</h3>
+    <ul>
+      <li *ngFor="let p of players">
+        {{ p.name }} → <b>{{ p.clue }}</b>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ================= STEP 5 : VOTING PHASE ================= -->
+<div *ngIf="step === 5">
+  <h2>Voting Phase</h2>
+
+  <!-- ===== CURRENT VOTER ===== -->
+  <div *ngIf="players[voteTurnIndex]?.playerId === playerId">
+    <h3>Your Turn to Vote</h3>
+
+    <button *ngFor="let p of players"
+            [disabled]="p.playerId === playerId"
+            (click)="vote(p.playerId)">
+      Vote {{ p.name }}
+    </button>
+  </div>
+
+  <!-- ===== WAITING ===== -->
+  <div *ngIf="players[voteTurnIndex]?.playerId !== playerId">
+    <h3>Waiting for {{ players[voteTurnIndex]?.name }}</h3>
+
+    <p style="color:orange;font-weight:bold">
+      👉 Pass the device to {{ players[voteTurnIndex]?.name }}
+    </p>
+
+    <button (click)="switchToVoteTurnPlayer()">
+      I'm {{ players[voteTurnIndex]?.name }}
+    </button>
+  </div>
+</div>
+
+
+<!-- ================= STEP 6 : RESULT ================= -->
+<div *ngIf="step === 6">
+  <h2>Result</h2>
+
+  <p *ngIf="result?.imposterCaught" style="color:green">
+    🎉 Imposter was caught!
+  </p>
+
+  <p *ngIf="!result?.imposterCaught" style="color:red">
+    😈 Imposter escaped!
+  </p>
+</div>
