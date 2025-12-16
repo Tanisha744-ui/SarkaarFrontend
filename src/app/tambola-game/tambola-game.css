@@ -1,0 +1,38 @@
+.tambola-game-container {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.tambola-game-container h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.tambola-game-container p {
+  font-size: 1.2em;
+}
+
+.tickets-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2px; /* Minimal spacing between tickets */
+  justify-items: center;
+}
+
+.ticket {
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 8px; /* Slightly reduced padding for compactness */
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #f9f9f9, #eaeaea);
+  transition: transform 0.2s;
+}
+
+.ticket:hover {
+  transform: scale(1.05);
+}
+.ticket-assignee {
+  color: black;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
