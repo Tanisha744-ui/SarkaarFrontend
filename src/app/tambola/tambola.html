@@ -1,0 +1,26 @@
+<div class="tambola-container">
+  <h1>Tambola Game</h1>
+  <form (ngSubmit)="startGame()">
+    <label for="players">Select No. of Players:</label>
+    <select id="players" [(ngModel)]="numPlayers" name="players" required (change)="updatePlayerFields()">
+      <option *ngFor="let num of [2, 3, 4, 5, 6]" [value]="num">{{ num }}</option>
+    </select>
+
+    <div *ngFor="let player of playerNames; let i = index; trackBy: trackByIndex">
+      <label for="player-{{i}}">Player #{{i + 1}}:</label>
+      <input id="player-{{i}}" [(ngModel)]="playerNames[i]" name="player-{{i}}" required minlength="3" #playerName="ngModel" />
+      <div *ngIf="playerName.invalid && playerName.touched" class="error">
+        Name must be at least 3 characters long.
+      </div>
+    </div>
+
+    <button type="submit" [disabled]="!areAllNamesValid()">Start</button>
+  </form>
+</div>
+
+<style>
+  .error {
+    color: red;
+    font-size: 0.9em;
+  }
+</style>

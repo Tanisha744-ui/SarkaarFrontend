@@ -7,6 +7,8 @@ import { Index } from './index/index';
 import { Dashboard } from './dashboard/dashboard';
 
 import { ImposterGame } from './imposter-game/imposter-game';
+import { TambolaGame } from './tambola-game/tambola-game';
+import { Tambola } from './tambola/tambola';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -16,4 +18,7 @@ export const routes: Routes = [
   { path: 'dashboard', component: Dashboard },
   { path: 'game', component: Landingpage },
   { path: 'imposter-game', component: ImposterGame },
+  { path: 'tambola', component: Tambola },
+  { path: 'tambola-game', component: TambolaGame }
+
 ];

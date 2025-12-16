@@ -1,0 +1,31 @@
+.tambola-container {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.tambola-container h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.tambola-container form {
+  display: inline-block;
+  text-align: left;
+}
+
+.tambola-container label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.tambola-container select {
+  margin-bottom: 20px;
+  padding: 5px;
+  font-size: 1em;
+}
+
+.tambola-container button {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+}
