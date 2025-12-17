@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './signup.css',
 })
 export class Signup {
+    loading: boolean = false;
   username: string = '';
   email: string = '';
   password: string = '';
@@ -25,6 +26,7 @@ export class Signup {
   onSignup(signupForm: any) {
     this.errorMsg = '';
     this.successMsg = '';
+    this.loading = true;
     const payload = {
       username: this.username,
       email: this.email,
@@ -33,22 +35,23 @@ export class Signup {
     };
     this.http.post('http://localhost:5046/signup', payload).subscribe({
       next: (res: any) => {
-        console.log('Signup response:', res);
         this.successMsg = 'Signup successful! Redirecting to login...';
-
+        this.loading = false;
         signupForm.resetForm();
-
         setTimeout(() => this.router.navigate(['/login']), 1000);
       },
-
       error: (err: HttpErrorResponse) => {
+        this.loading = false;
         if (err.status === 409) {
           this.errorMsg = 'Email already exists. Please try a different one.';
+        } else if (typeof err.error === 'string' && err.error.trim() !== '') {
+          this.errorMsg = err.error;
+        } else if (err.error?.message) {
+          this.errorMsg = err.error.message;
         } else {
-          this.errorMsg = err.error?.message || 'Signup failed. Please try again.';
+          this.errorMsg = 'Signup failed. Please try again.';
         }
       }
-
     });
   }
 }

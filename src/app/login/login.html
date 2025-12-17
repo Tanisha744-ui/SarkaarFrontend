@@ -2,8 +2,9 @@
   <div class="login-box">
     <h2>Login</h2>
     <form (ngSubmit)="onLogin()">
-      <div *ngIf="errorMsg" style="color:#f44336; margin-bottom:8px; font-weight:600;">{{ errorMsg }}</div>
-      <div *ngIf="successMsg" style="color:#4caf50; margin-bottom:8px; font-weight:600;">{{ successMsg }}</div>
+      <div *ngIf="loading" style="color:#2196f3; margin-bottom:8px; font-weight:600;">Logging in...</div>
+      <div *ngIf="!loading && errorMsg" style="color:#f44336; margin-bottom:8px; font-weight:600;">{{ errorMsg }}</div>
+      <div *ngIf="!loading && successMsg" style="color:#4caf50; margin-bottom:8px; font-weight:600;">{{ successMsg }}</div>
       <div class="form-group">
         <label for="username">Email</label>
         <input type="text" id="email" [(ngModel)]="email" name="email" required>
