@@ -1,0 +1,24 @@
+<div class="game-wrapper">
+  <div class="intro-card" *ngIf="cards.length === 0">
+    <h1 class="title">🕵️ Imposter Game</h1>
+
+    <p class="subtitle">
+      How many players are joining?
+    </p>
+
+    <input
+      type="number"
+      [(ngModel)]="playerCount"
+      min="3"
+      max="10"
+    />
+
+    <button
+      class="primary"
+      (click)="generateCards()"
+      [disabled]="playerCount < 3"
+    >
+      Generate Cards
+    </button>
+  </div>
+</div>
