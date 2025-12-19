@@ -1,0 +1,36 @@
+<div class="team-selection-container">
+  <h2 class="title">Select Teams for Sarkaar 👑</h2>
+
+  <div class="dropdown-section">
+    <label for="teamCount">Number of Teams</label>
+    <select
+      id="teamCount"
+      [(ngModel)]="teamCount"
+      (change)="onTeamCountChange()"
+    >
+      <option *ngFor="let n of teamNumbers" [value]="n">{{ n }}</option>
+    </select>
+  </div>
+
+  <div class="team-names-section">
+    <div
+      *ngFor="let name of teamNames; let i = index; trackBy: trackByIndex"
+      class="team-name-input"
+    >
+      <label>Team {{ i + 1 }}</label>
+      <input
+        [(ngModel)]="teamNames[i]"
+        name="teamName{{ i }}"
+        placeholder="Enter team name"
+      />
+    </div>
+  </div>
+
+  <button
+    class="proceed-btn"
+    (click)="proceed()"
+    [disabled]="!canProceed()"
+  >
+    Proceed 🚀
+  </button>
+</div>

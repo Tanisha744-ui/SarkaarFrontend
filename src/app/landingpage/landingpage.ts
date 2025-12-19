@@ -20,6 +20,9 @@ interface TeamData {
 export class Landingpage {
   teams: TeamData[] = [];
 
+  winnerModalOpen = false;
+  winnerTeam: TeamData | null = null;
+
   constructor() {
     // Try to read team names from localStorage
     const storedNames = localStorage.getItem('teamNames');
@@ -30,7 +33,7 @@ export class Landingpage {
       }
     } catch {}
     // Use provided names, fallback to default
-    if (names.length >= 2 && names.length <= 4) {
+    if (names.length >= 2 && names.length <= 10) {
       this.teams = names.map((name, idx) => ({
         teamId: String.fromCharCode(65 + idx),
         name,
@@ -150,6 +153,19 @@ export class Landingpage {
     setTimeout(()=>{
       this.results[teamId] = 'none';
     }, 3000);
+  }
+
+  showWinner() {
+    // Find team with max balance (the actual winner of the game)
+    let maxBalance = Math.max(...this.teams.map(t => t.balance));
+    let winners = this.teams.filter(t => t.balance === maxBalance);
+    this.winnerTeam = winners.length > 0 ? winners[0] : null;
+    this.winnerModalOpen = true;
+  }
+
+  closeWinnerModal() {
+    this.winnerModalOpen = false;
+    this.winnerTeam = null;
   }
 
 }
