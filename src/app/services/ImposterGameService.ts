@@ -10,7 +10,11 @@ export class ImposterGameService {
           return this.http.get<any[]>(`${this.api}/players?gameId=${gameId}`);
         }
       getClues(gameId: string) {
-        return this.http.get<any[]>(`${this.api}/submit-clue?gameId=${gameId}`);
+        return this.http.get<any[]>(`${this.api}/clues?gameId=${gameId}`);
+      }
+
+      getResult(gameId: string) {
+        return this.http.get<any>(`${this.api}/result?gameId=${gameId}`);
       }
     // registerPlayer(gameId: string, name: string) {
     //   return this.http.post<any>(`${this.api}/register-player`, { gameId, name });
@@ -25,8 +29,8 @@ export class ImposterGameService {
 
   constructor(private http: HttpClient) {}
 
-  createGame(words: string[]) {
-    return this.http.post<any>(`${this.api}/create`, { words });
+  createGame(playerNames: string[]) {
+    return this.http.post<any>(`${this.api}/create`, { playerNames });
   }
 
   joinGame(gameId: string, name: string) {
@@ -45,8 +49,13 @@ export class ImposterGameService {
     return this.http.post(`${this.api}/submit-clue`, { gameId, playerId, clue });
   }
 
-  vote(gameId: string, playerId: string, votedFor: string) {
-    return this.http.post(`${this.api}/vote`, { gameId, playerId, votedFor });
+  vote(gameId: string, playerId: string, suspectId: string) {
+    // Backend expects: GameId, VoterId, SuspectId
+    return this.http.post(`${this.api}/vote`, {
+      GameId: gameId,
+      VoterId: playerId,
+      SuspectId: suspectId
+    });
   }
 
   refreshPlayersAndClues() {
