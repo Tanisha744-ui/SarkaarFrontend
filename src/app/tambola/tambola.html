@@ -1,6 +1,6 @@
 <div class="tambola-container">
   <h1>Tambola Game</h1>
-  <form (ngSubmit)="startGame()">
+  <!-- <form (ngSubmit)="startGame()">
     <label for="players">Select No. of Players:</label>
     <select id="players" [(ngModel)]="numPlayers" name="players" required (change)="updatePlayerFields()">
       <option *ngFor="let num of [2, 3, 4, 5, 6]" [value]="num">{{ num }}</option>
@@ -15,7 +15,9 @@
     </div>
 
     <button type="submit" [disabled]="!areAllNamesValid()">Start</button>
-  </form>
+  </form> -->
+  <button (click)="navigateToOffline()">Start Offline Game</button>
+  <button (click)="startGame()">Start Online Game</button>
 </div>
 
 <style>

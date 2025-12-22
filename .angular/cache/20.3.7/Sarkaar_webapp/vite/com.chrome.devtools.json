@@ -1,6 +1,11 @@
 {
   "workspace": {
+<<<<<<< HEAD
     "root": "C:\\Users\\aayush.goel\\Desktop\\Games\\SarkaarFrontend",
     "uuid": "b54473cd-a338-4f1f-a08d-96c5425edf51"
+=======
+    "root": "C:\\Users\\safal.varadhan\\Sarkaar_gh\\SarkaarFrontend",
+    "uuid": "fa89faea-cb69-4791-b13e-f12c3ec6f357"
+>>>>>>> e7792779 (Base Tambola changes)
   }
 }

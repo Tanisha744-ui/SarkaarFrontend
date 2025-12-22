@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -10,16 +10,21 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './tambola-game.html',
   styleUrls: ['./tambola-game.css']
 })
-export class TambolaGame {
+export class TambolaGame implements OnDestroy, OnInit {
   numPlayers: number = 0;
   playerNames: string[] = [];
   tickets: number[][][] = [];
   ticketAssignments: string[] = []; // Track ticket assignments
   randomNumbers: number[] = [];
   isNumberGenerationScreen: boolean = false;
-  startButtonVisible: boolean = true; // Add this line
+  autoCallEnabled: boolean = false;
+  private autoCallInterval: any;
+  showAutoCall: boolean = false; // State for Auto Call toggle
+  autoCallPaused: boolean = true; // Track pause/resume state
+  currentNumber: string = "Waiting to start..."; // Default message before the game starts
+  isGameStarted: boolean = false; // Track whether the game has started
 
-  constructor(private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute, private router: Router) {
     this.route.queryParams.subscribe(params => {
       this.numPlayers = +params['players'] || 0;
       this.playerNames = Array.isArray(params['names']) ? params['names'] : (params['names'] ? [params['names']] : []);
@@ -28,6 +33,15 @@ export class TambolaGame {
         this.assignTickets();
       }
     });
+  }
+
+  ngOnInit() {
+    this.initializeGame();
+    this.isNumberGenerationScreen = true; // Ensure the grid is always displayed
+  }
+
+  initializeGame() {
+    // Logic to generate grid and cards
   }
 
   generateTickets() {
@@ -65,7 +79,6 @@ export class TambolaGame {
   }
 
   proceedToNumberGeneration() {
-    this.startButtonVisible = false;
     this.isNumberGenerationScreen = true;
   }
 
@@ -81,6 +94,7 @@ export class TambolaGame {
     } while (this.randomNumbers.includes(newNumber));
 
     this.randomNumbers.push(newNumber);
+    this.currentNumber = newNumber.toString(); // Update the current number
     console.log('Generated number:', newNumber);
   }
 
@@ -94,5 +108,67 @@ export class TambolaGame {
         return;
       }
     }
+  }
+
+  startNewGame() {
+    this.isGameStarted = true; // Mark the game as started
+    this.showAutoCall = true;
+    this.autoCallEnabled = true; // Auto Call is ON by default
+    this.autoCallPaused = false; // Start Auto Call immediately
+    this.randomNumbers = []; // Reset called numbers
+    this.currentNumber = "Waiting to start..."; // Reset the current number
+    this.isNumberGenerationScreen = true; // Show the number grid
+    this.startAutoCall(); // Begin Auto Call
+  }
+
+  restartGame() {
+    this.stopAutoCall(); // Stop any ongoing Auto Call
+    this.isGameStarted = false; // Reset the game state
+    this.showAutoCall = false;
+    this.autoCallEnabled = false; // Auto Call is OFF by default
+    this.autoCallPaused = true; // Pause Auto Call
+    this.randomNumbers = []; // Reset called numbers
+    this.currentNumber = "Waiting to start..."; // Reset the current number
+    this.isNumberGenerationScreen = false; // Hide the number grid
+    this.generateTickets(); // Regenerate tickets for players
+    this.assignTickets(); // Reassign tickets to players
+  }
+
+  toggleAutoCall() {
+    console.log('Toggle clicked:', this.autoCallEnabled);
+    if (!this.autoCallEnabled) {
+      this.stopAutoCall(); // Stop Auto Call when toggled off
+      this.autoCallPaused = true; // Ensure Auto Call is paused
+    } else {
+      this.autoCallPaused = !this.autoCallPaused;
+      if (!this.autoCallPaused) {
+        this.startAutoCall();
+      } else {
+        this.stopAutoCall();
+      }
+    }
+  }
+
+  startAutoCall() {
+    this.stopAutoCall(); // Ensure no duplicate intervals
+    this.autoCallInterval = setInterval(() => {
+      this.generateRandomNumber();
+    }, 3000); // Call every 3 seconds
+  }
+
+  stopAutoCall() {
+    clearInterval(this.autoCallInterval);
+  }
+
+  ngOnDestroy() {
+    this.stopAutoCall(); // Ensure Auto Call is stopped when the component is destroyed
+  }
+
+  onToggleClick(event: MouseEvent) {
+    console.log('Input clicked:', event);
+  }
+
+  navigateToOffline() {
+    this.router.navigate(['/tambola-game']);
   }
 }

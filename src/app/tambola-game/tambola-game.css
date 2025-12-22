@@ -1,38 +1,713 @@
 .tambola-game-container {
+  font-family: Arial, sans-serif;
+  color: #fff; /* White text for headings */
   text-align: center;
-  margin-top: 50px;
+  margin: 20px;
+  max-width: 1200px; /* Restrict container width for better alignment */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .tambola-game-container h1 {
-  font-size: 2em;
-  margin-bottom: 20px;
+  font-size: 2.5em;
+  color: #fff; /* White heading */
+  margin-bottom: 10px;
 }
 
 .tambola-game-container p {
   font-size: 1.2em;
+  margin-bottom: 20px;
+}
+
+.tambola-selection {
+  margin: 20px 0;
+}
+
+.tambola-selection button {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s;
+  margin: 0 10px;
+}
+
+.tambola-selection button:hover {
+  background-color: #0056b3;
 }
 
 .tickets-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2px; /* Minimal spacing between tickets */
-  justify-items: center;
+  grid-template-columns: repeat(2, 1fr); /* Strictly two tickets per row */
+  gap: 40px; /* Increase gap for better spacing */
+  justify-content: center; /* Center-align the tickets */
+  align-items: start; /* Align tickets to the top */
+  margin-bottom: 20px;
 }
 
 .ticket {
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  padding: 8px; /* Slightly reduced padding for compactness */
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(135deg, #f9f9f9, #eaeaea);
-  transition: transform 0.2s;
+  margin: 0 auto; /* Center each ticket within its grid cell */
+  padding: 15px;
+  border: 2px solid #000;
+  border-radius: 10px; /* Rounded corners */
+  background: linear-gradient(145deg, #e6e6e6, #ffffff); /* Subtle gradient background */
+  width: 280px; /* Adjust ticket width to fit within the grid */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Add subtle shadow for better visuals */
+  transition: transform 0.2s, box-shadow 0.2s; /* Smooth hover effect */
+  margin-bottom: 20px;
 }
 
 .ticket:hover {
-  transform: scale(1.05);
+  transform: scale(1.05); /* Slight zoom on hover */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
 }
-.ticket-assignee {
+
+.ticket table {
+  border-collapse: collapse;
+  margin: 10px auto;
+}
+
+.ticket td {
+  width: 30px; /* Adjusted cell size */
+  height: 30px;
+  text-align: center;
+  vertical-align: middle;
+  border: 1px solid #000;
+  background-color: #f0f0f0; /* Light grey for empty spaces */
   color: black;
+  font-size: 1em; /* Adjusted font size */
   font-weight: bold;
-  margin-bottom: 6px;
+}
+
+.ticket td.generated {
+  background-color: #4caf50; /* Green for generated numbers */
+  color: white;
+}
+
+.ticket h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  color: #444; /* Darker heading for contrast */
+}
+
+.ticket label {
+  display: block; /* Ensure label is on its own line */
+  font-size: 1em;
+  margin: 10px 0 5px; /* Add spacing around the label */
+  color: #333; /* Darker text for visibility */
+}
+
+.ticket select {
+  padding: 5px;
+  font-size: 1em;
+  width: 100%; /* Make dropdown full width */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.start-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  min-width: 140px; /* Match the width of the Restart Game button */
+  padding: 12px 24px; /* Adjust padding for a larger appearance */
+}
+
+.generate-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.number-generation-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px;
+}
+
+.number-grid-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white, matching Game Control card */
+  border: 2px solid #696666; /* Border to give a card-like appearance */
+  border-radius: 15px; /* Rounded corners */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  padding: 20px; /* Padding inside the card */
+  margin: 20px auto; /* Center the card */
+  max-width: 750px; /* Restrict the width */
+}
+
+.number-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 10px; /* Spacing between grid items */
+  margin: 0 auto; /* Center the grid */
+}
+
+.number-grid div {
+  width: 60px; /* Size of each number */
+  height: 60px; /* Size of each number */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ccc; /* Border for each number */
+  border-radius: 50%; /* Circular numbers */
+  background-color: #e1f8fe; /* Light blue background */
+  font-weight: bold;
+  color: #000; /* Black text */
+  font-size: 1.2em; /* Larger font size */
+  transition: transform 0.2s, box-shadow 0.2s; /* Smooth hover effect */
+}
+
+.number-grid div:hover {
+  transform: scale(1.1); /* Slight zoom on hover */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
+}
+
+.number-grid div.generated {
+  background-color: #4caf50; /* Green for generated numbers */
+  color: white;
+}
+
+.number-grid div.current {
+  background: linear-gradient(145deg, #2196F3, #bf4cc9); /* Blue-green gradient */
+  color: white;
+  animation: blink 1s infinite;
+}
+
+.generated-numbers-row {
+  text-align: center;
+}
+
+.generated-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.generated-number {
+  display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  font-size: 1em;
+  font-weight: bold;
+  color: #333;
+}
+
+.assign-dropdown {
+  margin-top: 10px;
+  padding: 5px;
+  font-size: 1em;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.toggle-container {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 60px; /* Match the toggle width */
+  height: 34px; /* Match the toggle height */
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer; /* Ensure the cursor changes to pointer */
+  z-index: 1; /* Ensure the input is above the slider */
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px; /* Ensure the slider matches the toggle height */
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px; /* Balanced knob size */
+  width: 16px; /* Balanced knob size */
+  left: 4px; /* Adjusted position */
+  bottom: 4px; /* Adjusted position */
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #007bff;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px); /* Adjusted travel distance for proper alignment */
+}
+
+input {
+  position: absolute;
+  opacity: 0;
+  width: 100%; /* Ensure the input covers the entire slider */
+  height: 100%;
+  cursor: pointer;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.game-control {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.start-game {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #4caf50;
+  color: white;
+  transition: background-color 0.3s;
+  min-width: 140px; /* Match the width of the Restart Game button */
+  padding: 12px 24px; /* Adjust padding for a larger appearance */
+}
+
+.start-game:hover {
+  background-color: #45a049;
+}
+
+.restart-game {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background: red; /* Red color for restart button */
+  color: white;
+  transition: background-color 0.3s;
+  margin-left: 10px; /* Spacing between buttons */
+  min-width: 140px; /* Match the width of the Call Next Number button */
+  padding: 12px 24px; /* Adjust padding for a larger appearance */
+}
+
+.restart-game:hover {
+  background-color: rgb(184, 0, 0); /* Darker red on hover */
+}
+
+label[for="auto-call-toggle"] {
+  margin-right: 10px;
+  font-size: 1em;
+  color: #333;
+}
+
+input#auto-call-toggle {
+  transform: scale(1.5);
+  margin-left: 10px;
+}
+
+.game-controls-card {
+  background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
+  padding: 30px;
+  border-radius: 10px;
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.game-controls-card h3 {
+  margin-top: 0;
+  font-size: 1.5em;
+  color: #fff;
+}
+
+.toggle-label {
+  font-size: 1em;
+  color: #333;
+  margin-right: 10px;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px; /* Further reduced width */
+  height: 24px; /* Further reduced height */
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 40px; /* Match the toggle width */
+  height: 24px; /* Match the toggle height */
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer; /* Ensure the cursor changes to pointer */
+  z-index: 1; /* Ensure the input is above the slider */
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px; /* Ensure the slider matches the toggle height */
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px; /* Balanced knob size */
+  width: 16px; /* Balanced knob size */
+  left: 4px; /* Adjusted position */
+  bottom: 4px; /* Adjusted position */
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px); /* Adjusted travel distance for proper alignment */
+}
+
+input {
+  position: absolute;
+  opacity: 0;
+  width: 100%; /* Ensure the input covers the entire slider */
+  height: 100%;
+  z-index: 3; /* Ensure the input is above everything */
+  cursor: pointer;
+}
+
+.auto-call-toggle {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px; /* Add spacing below the Auto Call toggle */
+}
+
+.toggle-label {
+  font-size: 1em;
+  color: white;
+  margin-right: 10px;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px; /* Further reduced width */
+  height: 24px; /* Further reduced height */
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 40px; /* Match the toggle width */
+  height: 24px; /* Match the toggle height */
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer; /* Ensure the cursor changes to pointer */
+  z-index: 1; /* Ensure the input is above the slider */
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px; /* Ensure the slider matches the toggle height */
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px; /* Balanced knob size */
+  width: 16px; /* Balanced knob size */
+  left: 4px; /* Adjusted position */
+  bottom: 4px; /* Adjusted position */
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px); /* Adjusted travel distance for proper alignment */
+}
+
+input {
+  position: absolute;
+  opacity: 0;
+  width: 100%; /* Ensure the input covers the entire slider */
+  height: 100%;
+  z-index: 3; /* Ensure the input is above everything */
+  cursor: pointer;
+}
+
+.manual-call {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.call-next {
+  padding: 10px 20px;
+  font-size: 1em;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px; /* Add spacing above the buttons */
+}
+
+.call-next:hover {
+  background-color: #0056b3;
+}
+
+.auto-call-control {
+  margin-top: 20px;
+}
+
+.pause-resume {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #ffc107;
+  color: black;
+  transition: background-color 0.3s;
+}
+
+.pause-resume:hover {
+  background-color: #e0a800;
+}
+
+.pause-button {
+  background-color: red !important; /* Override global button styles */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  margin-top: 10px; /* Add spacing above the buttons */
+}
+
+.pause-button:hover {
+  background-color: darkred;
+}
+
+.resume-button {
+  background-color: green !important; /* Override global button styles */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  margin-top: 10px; /* Add spacing above the buttons */
+}
+
+.resume-button:hover {
+  background-color: darkgreen;
+}
+
+.game-layout {
+  display: flex;
+  justify-content: flex-start; /* Align content further towards the left */
+  align-items: flex-start;
+}
+
+.left-half {
+  flex: 7;
+  padding-right : 20px;
+  margin: 0px -5px; /* Increased spacing between left and right halves */
+}
+
+.right-half {
+  flex: 3;
+  padding: 20px;
+}
+
+.current-number-card {
+  background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
+  padding: 30px; /* Match Game Control card padding */
+  border-radius: 10px; /* Match Game Control card border radius */
+  border: 1px;
+
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Match Game Control card shadow */
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center; /* Center align content */
+}
+
+.current-number-card h3 {
+  margin-top: 0;
+  font-size: 1.5em; /* Match Game Control card heading size */
+  color: #fff; /* Match Game Control card heading color */
+}
+
+.current-number {
+  font-size: 1em; /* Normal text size */
+  color: #ccc; /* Dark white color */
+  transition: font-size 0.3s, color 0.3s; /* Smooth transition for size and color */
+}
+
+.current-number.active {
+  animation: blink 1s infinite; /* Blinking effect for active number */
+  font-size: 5em; /* Larger font size for active number */
+  color: #2295f4; /* Bright white for active number */
+  min-height: 100px;
+}
+
+.called-numbers-card {
+  background-color: rgba(255, 255, 255, 0.1); /* Match existing card style */
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.called-numbers-card h3 {
+  margin-top: 0;
+  font-size: 1.5em;
+  color: #fff;
+}
+
+.called-numbers-card p {
+  font-size: 1em;
+  color: #ccc;
+  margin-bottom: 10px;
+}
+
+.called-numbers-list {
+  max-height: 150px; /* Restrict height for scroll */
+  overflow-y: auto; /* Add vertical scrollbar */
+  background-color: rgba(0, 0, 0, 0.2); /* Slightly darker background */
+  padding: 10px;
+  border-radius: 5px;
+  text-align: left;
+  min-height: 100px;
+}
+
+.called-number {
+  display: inline-block;
+  margin: 5px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 20px; /* Make called numbers rounder */
+  font-size: 1em;
+}
+
+.called-numbers-list .no-numbers {
+  display: block;
+  text-align: center;
+  color: #ccc;
+  margin: 10px 0;
+}
+
+.dialog-box {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.dialog-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dialog-content h3 {
+  margin: 0 0 10px;
+  font-size: 1.5em;
+  color: #333;
+}
+
+.dialog-content p {
+  margin: 0 0 20px;
+  font-size: 1em;
+  color: #666;
+}
+
+.restart-button {
+  padding: 10px 20px;
+  font-size: 1em;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.game-controls-card .pause-button {
+  background: grey !important; /* Reset background to solid red */
+  color: white !important;
+
+}
+
+.game-controls-card .resume-button {
+  background: rgb(83, 159, 51) !important; /* Reset background to solid green */
+  color: white !important;
+
+}
+
+.game-controls-card button,
+.current-number-card button,
+.called-numbers-card button {
+  border-radius: 20px; /* Make buttons rounder */
+}
+
+.number-grid div {
+  border-radius: 50%; /* Ensure numbers are perfectly circular */
 }

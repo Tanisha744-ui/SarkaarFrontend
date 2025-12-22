@@ -1,8 +1,15 @@
 {
+<<<<<<< HEAD
   "hash": "4a972fc2",
   "configHash": "45bd1951",
   "lockfileHash": "0e352d08",
   "browserHash": "74a4adb7",
+=======
+  "hash": "30d47f6e",
+  "configHash": "8961b51d",
+  "lockfileHash": "0e352d08",
+  "browserHash": "0555fc63",
+>>>>>>> e7792779 (Base Tambola changes)
   "optimized": {},
   "chunks": {}
 }

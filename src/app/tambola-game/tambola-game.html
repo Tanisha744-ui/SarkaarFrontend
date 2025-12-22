@@ -1,236 +1,74 @@
 <div class="tambola-game-container">
   <h1>Tambola Game</h1>
-  <p>Number of Players: {{ numPlayers }}</p>
-
-  <div class="tickets-container">
-    <div *ngFor="let ticket of tickets; let i = index" class="ticket">
-      <h2>Ticket #{{ i + 1 }}</h2>
-      <p class="ticket-assignee">Assigned to: {{ ticketAssignments[i] }}</p>
-      <table>
-        <tr *ngFor="let row of ticket">
-          <td *ngFor="let cell of row" [class.generated]="randomNumbers.includes(cell)">
-            {{ cell !== null ? cell : '' }}
-          </td>
-        </tr>
-      </table>
-      <label for="assign-player-{{i}}">Reassign to:</label>
-      <select id="assign-player-{{i}}" [(ngModel)]="ticketAssignments[i]" class="assign-dropdown">
-        <option *ngFor="let player of playerNames" [value]="player">{{ player }}</option>
-      </select>
-    </div>
-  </div>
-
-  <div *ngIf="startButtonVisible">
-    <button class="start-button" (click)="proceedToNumberGeneration()">Start</button>
-  </div>
-
-  <div *ngIf="isNumberGenerationScreen" class="number-generation-screen">
-    <div class="number-grid-container">
-      <div class="number-grid">
-        <div *ngFor="let number of [].constructor(90); let i = index" 
-             [class.generated]="randomNumbers.includes(i + 1)"
-             [class.current]="randomNumbers[randomNumbers.length - 1] === i + 1">
-          {{ i + 1 }}
-        </div>
-      </div>
-
-      <div class="generated-numbers-row">
-        <h3>Generated Numbers</h3>
-        <div class="generated-numbers">
-          <span *ngFor="let number of randomNumbers" class="generated-number">{{ number }}</span>
+  <div class="game-layout">
+    <div class="left-half">
+      <div class="main-grid">
+        <div class="number-generation-screen">
+          <div class="number-grid-container">
+            <div class="number-grid">
+              <div *ngFor="let number of [].constructor(90); let i = index" 
+                   [class.generated]="randomNumbers.includes(i + 1)"
+                   [class.current]="randomNumbers[randomNumbers.length - 1] === i + 1">
+                {{ i + 1 }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <button class="generate-button" (click)="generateRandomNumber(); checkWinner()">Generate Number</button>
+    <div class="right-half">
+      <div class="game-controls-card">
+        <h3>Game Controls</h3>
+        <div class="game-control">
+          <button *ngIf="!isGameStarted" (click)="startNewGame()" class="start-game">Start New Game</button>
+          <button *ngIf="isGameStarted" (click)="restartGame()" class="restart-game">Restart Game</button>
+          <div *ngIf="showAutoCall" class="auto-call-toggle">
+            <label class="toggle-label">Auto Call</label>
+            <div class="toggle-switch">
+              <input id="auto-call-toggle" type="checkbox" [(ngModel)]="autoCallEnabled" (change)="toggleAutoCall()" />
+              <span class="slider"></span>
+            </div>
+          </div>
+          <div *ngIf="showAutoCall">
+            <button *ngIf="autoCallEnabled && !autoCallPaused" (click)="toggleAutoCall()" class="pause-button">
+              <span>&#10074;&#10074;</span> Pause
+            </button>
+            <button *ngIf="autoCallEnabled && autoCallPaused" (click)="toggleAutoCall()" class="resume-button">
+              <span>&#9654;</span> Resume
+            </button>
+            <button *ngIf="!autoCallEnabled" (click)="generateRandomNumber()" class="call-next">Call Next Number</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="current-number-card">
+        <h3>Current Number</h3>
+        <div class="current-number" [ngClass]="{'active': randomNumbers.length > 0}">
+          {{ currentNumber }}
+        </div>
+      </div>
+
+      <div class="called-numbers-card">
+        <h3>Called Numbers</h3>
+        <p>{{ randomNumbers.length }} / 90 numbers called</p>
+        <div class="called-numbers-list">
+          <span *ngIf="randomNumbers.length === 0" class="no-numbers">No numbers called yet.</span>
+          <span *ngFor="let number of randomNumbers" class="called-number">{{ number }}</span>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <div *ngIf="randomNumbers.length === 90" class="dialog-box">
+        <div class="dialog-content">
+          <h3>All Numbers Called!</h3>
+          <p>The game has completed calling all numbers.</p>
+          <button (click)="restartGame()" class="restart-button">Start Again</button>
+        </div>
+      </div>
 </div>
 
 <style>
-  .tambola-game-container {
-    font-family: Arial, sans-serif;
-    color: #fff; /* White text for headings */
-    text-align: center;
-    margin: 20px;
-    max-width: 1200px; /* Restrict container width for better alignment */
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .tambola-game-container h1 {
-    font-size: 2.5em;
-    color: #fff; /* White heading */
-    margin-bottom: 10px;
-  }
-
-  .tambola-game-container p {
-    font-size: 1.2em;
-    margin-bottom: 20px;
-  }
-
-  .tickets-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Strictly two tickets per row */
-    gap: 40px; /* Increase gap for better spacing */
-    justify-content: center; /* Center-align the tickets */
-    align-items: start; /* Align tickets to the top */
-    margin-bottom: 20px;
-  }
-
-  .ticket {
-    margin: 0 auto; /* Center each ticket within its grid cell */
-    padding: 15px;
-    border: 2px solid #000;
-    border-radius: 10px; /* Rounded corners */
-    background: linear-gradient(145deg, #e6e6e6, #ffffff); /* Subtle gradient background */
-    width: 280px; /* Adjust ticket width to fit within the grid */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Add subtle shadow for better visuals */
-    transition: transform 0.2s, box-shadow 0.2s; /* Smooth hover effect */
-    margin-bottom: 20px;
-  }
-
-  .ticket:hover {
-    transform: scale(1.05); /* Slight zoom on hover */
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
-  }
-
-  .ticket table {
-    border-collapse: collapse;
-    margin: 10px auto;
-  }
-
-  .ticket td {
-    width: 30px; /* Adjusted cell size */
-    height: 30px;
-    text-align: center;
-    vertical-align: middle;
-    border: 1px solid #000;
-    background-color: #f0f0f0; /* Light grey for empty spaces */
-    color: black;
-    font-size: 1em; /* Adjusted font size */
-    font-weight: bold;
-  }
-
-  .ticket td.generated {
-    background-color: #4caf50; /* Green for generated numbers */
-    color: white;
-  }
-
-  .ticket h2 {
-    text-align: center;
-    margin-bottom: 10px;
-    font-size: 1.2em;
-    color: #444; /* Darker heading for contrast */
-  }
-
-  .ticket label {
-    display: block; /* Ensure label is on its own line */
-    font-size: 1em;
-    margin: 10px 0 5px; /* Add spacing around the label */
-    color: #333; /* Darker text for visibility */
-  }
-
-  .ticket select {
-    padding: 5px;
-    font-size: 1em;
-    width: 100%; /* Make dropdown full width */
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-
-  .start-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 1em;
-    cursor: pointer;
-  }
-
-  .generate-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 1em;
-    cursor: pointer;
-  }
-
-  .number-generation-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 20px;
-  }
-
-  .number-grid-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .number-grid {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 5px;
-    max-width: 500px;
-    margin-bottom: 20px;
-  }
-
-  .number-grid div {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #e0f7fa; /* Light blue matching the theme */
-    font-weight: bold;
-    color: #000; /* Changed to dark black for better visibility */
-  }
-
-  .number-grid div.generated {
-    background-color: #4caf50; /* Green for generated numbers */
-    color: white;
-  }
-
-  .number-grid div.current {
-    background-color: #ff9800; /* Orange for the current number */
-    color: white;
-    animation: blink 1s infinite;
-  }
-
-  .generated-numbers-row {
-    text-align: center;
-  }
-
-  .generated-numbers {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .generated-number {
-    display: inline-block;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    font-size: 1em;
-    font-weight: bold;
-    color: #333;
-  }
-
-  .assign-dropdown {
-    margin-top: 10px;
-    padding: 5px;
-    font-size: 1em;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-
-  @keyframes blink {
-    50% {
-      opacity: 0.5;
-    }
-  }
+  /* Removed inline CSS, moved to tambola-game.css */
 </style>

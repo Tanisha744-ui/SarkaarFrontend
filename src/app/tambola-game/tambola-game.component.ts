@@ -17,6 +17,12 @@ export class TambolaGameComponent {
   randomNumbers: number[] = [];
   isNumberGenerationScreen: boolean = false;
   startButtonVisible: boolean = true; // New property to control 'Start' button visibility
+  autoCallEnabled: boolean = true; // Default ON
+  showAutoCall: boolean = false; // State for Auto Call toggle
+  autoCallPaused: boolean = true; // Add missing property
+  autoCallInterval: any; // Add property to store interval ID
+  currentNumber: string = "Waiting to start..."; // Default message before the game starts
+  isGameStarted: boolean = false; // Track if the game has started
 
   constructor() {
     // Initialize with some default values for testing
@@ -57,4 +63,30 @@ export class TambolaGameComponent {
       }
     }
   }
+
+  startNewGame() {
+    this.isGameStarted = true;
+    this.showAutoCall = true;
+    this.autoCallEnabled = true; // Auto Call is ON by default
+  }
+
+  restartGame() {
+    this.isGameStarted = false;
+    this.showAutoCall = false;
+    this.autoCallEnabled = false; // Reset Auto Call
+    this.randomNumbers = []; // Clear all called numbers
+    window.location.reload(); // Refresh the page to reset the state
+  }
+
+  toggleAutoCall() {
+    this.autoCallEnabled = !this.autoCallEnabled;
+  }
+
+  onToggleClick(event: MouseEvent) {
+    console.log('Input clicked:', event);
+  }
+
+  // navigateToOffline() {
+  //   console.log('Navigating to offline mode...');
+  // }
 }

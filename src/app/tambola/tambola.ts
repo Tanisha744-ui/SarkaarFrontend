@@ -32,7 +32,9 @@ export class Tambola {
   trackByIndex(index: number, item: any): number {
     return index;
   }
-
+  navigateToOffline() {
+    this.router.navigate(['/tambola-game']);
+  }
   areAllNamesValid(): boolean {
     return this.playerNames.every(name => name.trim().length >= 3);
   }
