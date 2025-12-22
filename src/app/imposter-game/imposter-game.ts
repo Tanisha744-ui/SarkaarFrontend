@@ -26,7 +26,7 @@ export class ImposterGame implements OnDestroy, OnInit {
   clues: any[] = [];
   myClue = '';
   myVote = '';
-  players: any[] = [];
+  players: any[] = []; // Replace with your actual player model
   cluesSubmitted = false;
   votesSubmitted = false;
   result: any = null;
@@ -39,6 +39,10 @@ export class ImposterGame implements OnDestroy, OnInit {
   votePhaseComplete: boolean = false; // Added to fix property error
   nextPlayerIndex: number = 0; // Added to fix property error
   showPassScreen: boolean = false; // Added to fix property error
+
+  phase: 'setup' | 'clue' | 'vote' | 'done' = 'setup';
+  currentTurn: number = 0;
+  showPassCard: boolean = false;
 
   constructor(private gameService: ImposterGameService) { }
 
@@ -96,8 +100,12 @@ export class ImposterGame implements OnDestroy, OnInit {
         this.currentPlayerIndex = 0;
         this.playerId = this.players[0].playerId;
 
-        this.getWordAndRole();
-        this.step = 4;
+        // Start with PASS SCREEN for first clue
+        this.clueTurnIndex = 0;
+        this.nextPlayerIndex = 0;
+        this.showPassScreen = true;
+        this.step = 4.5;
+
 
         this.pollInterval = setInterval(() => {
           this.refreshTurnInfo();
@@ -160,25 +168,23 @@ export class ImposterGame implements OnDestroy, OnInit {
 
   // Called when user clicks to proceed from all clues page to voting
   proceedToVotingPhase() {
-    this.step = 6; // voting phase
-    this.refreshPlayersAndClues();
-    this.refreshTurnInfo();
-  }
-  //         });
-  //       });
-  //     });
-  // }
+  this.voteTurnIndex = 0;
+  this.showPassScreen = true;
+  this.step = 6.5; // pass screen before voting
+}
+
 
   proceedToNextClue() {
-    // Set playerId to next player and go to clue phase
-    const nextPlayer = this.players[this.nextPlayerIndex];
-    if (nextPlayer) {
-      this.playerId = nextPlayer.playerId;
-      this.getWordAndRole();
-    }
-    this.showPassScreen = false;
-    this.step = 4;
+  const nextPlayer = this.players[this.nextPlayerIndex];
+  if (nextPlayer) {
+    this.playerId = nextPlayer.playerId;
+    this.getWordAndRole();
   }
+
+  this.showPassScreen = false;
+  this.step = 4; // Clue screen
+}
+
 
 
 
@@ -214,8 +220,8 @@ export class ImposterGame implements OnDestroy, OnInit {
           this.refreshTurnInfo();
 
           // 🔥 Show pass device screen
-          this.showPassScreen = true;
-          this.step = 6.5;
+          // this.showPassScreen = true;
+          // this.step = 6.5;
         },
         error: () => {
           // Even if already voted, sync state
@@ -312,5 +318,35 @@ export class ImposterGame implements OnDestroy, OnInit {
     return 'Unknown';
   }
 
+  startCluePhase() {
+    this.phase = 'clue';
+    this.currentTurn = 0;
+    this.showPassCard = true;
+  }
+
+  nextClueTurn() {
+    if (this.currentTurn < this.players.length - 1) {
+      this.currentTurn++;
+      this.showPassCard = true;
+    } else {
+      this.phase = 'vote';
+      this.currentTurn = 0;
+      this.showPassCard = true;
+    }
+  }
+
+  nextVoteTurn() {
+    if (this.currentTurn < this.players.length - 1) {
+      this.currentTurn++;
+      this.showPassCard = true;
+    } else {
+      this.phase = 'done';
+      // Show results, etc.
+    }
+  }
+
+  confirmPass() {
+    this.showPassCard = false;
+  }
 
 }

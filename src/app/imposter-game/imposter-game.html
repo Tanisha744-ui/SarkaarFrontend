@@ -152,4 +152,17 @@
     </h3>
   </div>
 
+  <div *ngIf="showPassCard" class="pass-device-overlay">
+    <div class="pass-card">
+      <h2>Pass the device to:</h2>
+      <p>
+        <strong>
+          {{ phase === 'clue' ? 'Player ' + (currentTurn + 1) + ' for clue' : 
+             phase === 'vote' ? 'Player ' + (currentTurn + 1) + ' for voting' : '' }}
+        </strong>
+      </p>
+      <button class="primary" (click)="confirmPass()">I'm Ready</button>
+    </div>
+  </div>
+
 </div>
