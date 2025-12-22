@@ -10,7 +10,7 @@
   </div>
 
   <div class="main-content-area">
-    <div class="team-grid">
+    <div class="team-grid" [ngClass]="{'two-columns': teams.length === 2}">
       <app-team-card *ngFor="let team of teams" [team]="team" [isLocked]="isGameLocked"
         [isActive]="activeTeam === team.teamId" [answerEnabled]="!!roundTimer?.running"
         [resultState]="results[team.teamId] || 'none'" (bidChange)="onBidPlaced($event, team.teamId)"

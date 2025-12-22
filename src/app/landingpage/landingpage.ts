@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf, NgClass } from '@angular/common';
 import { TeamCard } from '../team-card/team-card';
 import { Timer } from '../timer/timer';
 
@@ -12,7 +12,7 @@ interface TeamData {
 
 @Component({
   selector: 'app-landingpage',
-  imports: [TeamCard, NgFor, NgIf, Timer],
+  imports: [TeamCard, NgFor, NgIf, NgClass, Timer],
   templateUrl: './landingpage.html',
   styleUrl: './landingpage.css',
   standalone: true
