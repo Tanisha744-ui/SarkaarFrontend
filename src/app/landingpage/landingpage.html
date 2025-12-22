@@ -1,30 +1,40 @@
 <div class="landing-container">
-    <img src="https://img.freepik.com/free-vector/auction-show-horizontal-background_1284-29707.jpg?w=2000&t=st=1701016957~exp=1701017557~hmac=88f519a79ea384593895638969b3ddc421f441a5d45bf8008ad3ebab7fd04f28" alt="Landing Page Background" class="background-image">
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <div class="timer-wrapper" *ngIf="isGameLocked">
-        <app-timer #roundTimer (finished)="onTimerFinished()"></app-timer>
+  <div class="timer-wrapper" *ngIf="isGameLocked">
+    <app-timer #roundTimer (finished)="onTimerFinished()"></app-timer>
+  </div>
+  <div class="game-header">
+    <h1 class="game-title">👑 Sarkaar</h1>
+    <p class="game-subtitle">
+      Bid smart. Answer right. Rule the game.
+    </p>
+  </div>
+
+  <div class="main-content-area">
+    <div class="team-grid">
+      <app-team-card *ngFor="let team of teams" [team]="team" [isLocked]="isGameLocked"
+        [isActive]="activeTeam === team.teamId" [answerEnabled]="!!roundTimer?.running"
+        [resultState]="results[team.teamId] || 'none'" (bidChange)="onBidPlaced($event, team.teamId)"
+        (answer)="handleAnswer($event, team.teamId)">
+      </app-team-card>
     </div>
-    
-    <div class="content">
-        <app-team-card
-            *ngFor="let team of teams"
-            [team]="team"
-            [isLocked]="isGameLocked"
-            [isActive]="activeTeam === team.teamId"
-            [answerEnabled]="!!roundTimer?.running"
-            [resultState]="results[team.teamId] || 'none'"
-            (bidChange)="onBidPlaced($event, team.teamId)"
-            (answer)="handleAnswer($event, team.teamId)">
-        </app-team-card>
-    </div>
+
     <div class="lock-wrapper" *ngIf="!isGameLocked">
-        <button class="lock-button" (click)="lockBids()" [disabled]="!canLock()">Lock Bids</button>
+      <button class="lock-button" (click)="lockBids()" [disabled]="!canLock()">
+        🔒 Lock Bids
+      </button>
+        <button class="winner-button" (click)="showWinner()" [disabled]="teams.length === 0">
+          🏆 Show Winner
+        </button>
     </div>
+      <div class="winner-modal" *ngIf="winnerModalOpen">
+        <div class="winner-content animate-winner">
+          <h2>🏆 Winner</h2>
+          <div *ngIf="winnerTeam">
+            <p class="winner-name">{{ winnerTeam.name }}</p>
+            <p class="winner-bid">Balance: ₹{{ winnerTeam.balance }}</p>
+          </div>
+          <button class="close-winner" (click)="closeWinnerModal()">Close</button>
+        </div>
+      </div>
+  </div>
 </div>

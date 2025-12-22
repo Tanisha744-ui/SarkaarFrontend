@@ -12,17 +12,19 @@ import { Tambola } from './tambola/tambola';
 import { ImposterMode } from './imposter-mode/imposter-mode';
 import { ImposterOffline } from './imposter-offline/imposter-offline';
 
+import { TeamSelection } from './team-selection/team-selection';
+
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: Login },
   { path: 'signup', component: Signup },
   { path: 'index', component: Index },
   { path: 'dashboard', component: Dashboard },
+  { path: 'team-selection', component: TeamSelection },
   { path: 'game', component: Landingpage },
   { path: 'imposter-mode', component: ImposterMode },
   { path: 'imposter-game', component: ImposterGame },
   { path: 'imposter-offline', component: ImposterOffline },
   { path: 'tambola', component: Tambola },
   { path: 'tambola-game', component: TambolaGame }
-
 ];
