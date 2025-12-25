@@ -29,6 +29,7 @@ export class TeamCard implements OnChanges {
   @Output() answer = new EventEmitter<boolean>();
 
   currentBidAmount: number | undefined;
+  stepCount: number = 10;
   
   // Helper method to safely check if bid exceeds balance
   isBidExceedingBalance(): boolean {
@@ -38,12 +39,31 @@ export class TeamCard implements OnChanges {
   ngOnInit() {
     // Don't set initial value, let placeholder show
     this.currentBidAmount = undefined;
+    this.setTeamBalanceFromMaxBid();
+    const stepStr = localStorage.getItem('stepCount');
+    if (stepStr) {
+      const step = parseInt(stepStr, 10);
+      if (!isNaN(step)) {
+        this.stepCount = step;
+      }
+    }
+  }
+
+  setTeamBalanceFromMaxBid() {
+    const maxBidStr = localStorage.getItem('maxBid');
+    if (maxBidStr && this.team) {
+      const maxBid = parseInt(maxBidStr, 10);
+      if (!isNaN(maxBid)) {
+        this.team.balance = maxBid;
+      }
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
     // Keep local input value in sync when parent updates team.currentBid (e.g., reset to 0)
     if (changes['team'] && this.team) {
       this.currentBidAmount = this.team.currentBid ?? 0;
+      this.setTeamBalanceFromMaxBid();
     }
     // When locked/unlocked, ensure input reflects current team.bid
     if (changes['isLocked'] && this.team) {
@@ -71,5 +91,13 @@ export class TeamCard implements OnChanges {
   onAnswer(correct: boolean) {
     if (!this.answerEnabled) return; // ignore clicks until timer started
     this.answer.emit(correct);
+  }
+  changeBid(direction: 'up' | 'down') {
+    if (this.isLocked) return;
+    let value = this.currentBidAmount ?? 0;
+    const delta = direction === 'up' ? this.stepCount : -this.stepCount;
+    value += delta;
+    value = Math.max(0, Math.min(value, this.team.balance));
+    this.currentBidAmount = value;
   }
 }

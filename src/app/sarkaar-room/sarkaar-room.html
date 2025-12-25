@@ -1,0 +1,41 @@
+<div class="room-container">
+  <div *ngIf="connectionState !== 'connected'" class="room-status">
+    <span *ngIf="connectionState === 'connecting'">Connecting to server...</span>
+    <span *ngIf="connectionState === 'error'">Connection error: {{ lastError }}</span>
+  </div>
+  <div class="room-card" *ngIf="mode === 'none'">
+    <h2>Play with Friends</h2>
+    <div class="room-options">
+      <button class="room-btn create" (click)="selectMode('create')">Create Room</button>
+      <button class="room-btn join" (click)="selectMode('join')">Join Room</button>
+    </div>
+  </div>
+
+  <!-- Create Room UI -->
+  <div *ngIf="mode === 'create' && !joined" class="room-card">
+    <h2>Create Room</h2>
+    <input [(ngModel)]="teamName" placeholder="Team Name" class="room-input" />
+    <button class="room-btn create" (click)="createRoom()" [disabled]="!teamName">Create & Join</button>
+    <button class="room-btn back" (click)="mode = 'none'">Back</button>
+  </div>
+
+  <!-- Join Room UI -->
+  <div *ngIf="mode === 'join' && !joined" class="room-card">
+    <h2>Join Room</h2>
+    <input [(ngModel)]="code" placeholder="Room Code" maxlength="6" class="room-input" />
+    <input [(ngModel)]="teamName" placeholder="Team Name" class="room-input" />
+    <button class="room-btn join" (click)="joinRoom()" [disabled]="!code || !teamName">Join</button>
+    <button class="room-btn back" (click)="mode = 'none'">Back</button>
+  </div>
+
+  <!-- After joining, show code and teams -->
+  <div *ngIf="joined" class="room-card">
+    <h2>Room Code: <span class="room-code">{{ code }}</span></h2>
+    <h3>Teams Joined ({{ teams.length }}/10):</h3>
+    <ul class="team-list">
+      <li *ngFor="let t of teams">{{ t }}</li>
+    </ul>
+    <button class="room-btn proceed" (click)="proceedToGame()" [disabled]="teams.length < 2">Proceed to Game</button>
+    <button class="room-btn back" (click)="mode = 'none'">Back</button>
+  </div>
+</div>

@@ -1,4 +1,8 @@
 <div class="landing-container">
+  <div *ngIf="toasterMessage" class="toaster-card">
+    <span class="toaster-message">{{ toasterMessage }}</span>
+    <button class="toaster-close" (click)="closeToaster()" aria-label="Close">&times;</button>
+  </div>
   <div class="timer-wrapper" *ngIf="isGameLocked">
     <app-timer #roundTimer (finished)="onTimerFinished()"></app-timer>
   </div>
@@ -22,16 +26,16 @@
       <button class="lock-button" (click)="lockBids()" [disabled]="!canLock()">
         🔒 Lock Bids
       </button>
-        <button class="winner-button" (click)="showWinner()" [disabled]="teams.length === 0">
-          🏆 Show Winner
-        </button>
+      <button class="winner-button" (click)="showWinner()" [disabled]="teams.length === 0" *ngIf="hasPlayedAtLeastOneRound">
+        🏆 Show Winner
+      </button>
     </div>
       <div class="winner-modal" *ngIf="winnerModalOpen">
         <div class="winner-content animate-winner">
           <h2>🏆 Winner</h2>
           <div *ngIf="winnerTeam">
             <p class="winner-name">{{ winnerTeam.name }}</p>
-            <p class="winner-bid">Balance: ₹{{ winnerTeam.balance }}</p>
+            <p class="winner-bid">Balance: {{ winnerTeam.balance }}</p>
           </div>
           <button class="close-winner" (click)="closeWinnerModal()">Close</button>
         </div>

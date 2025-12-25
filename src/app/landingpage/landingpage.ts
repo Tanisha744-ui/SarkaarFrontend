@@ -18,10 +18,14 @@ interface TeamData {
   standalone: true
 })
 export class Landingpage {
+    // Toaster state
+    toasterMessage: string | null = null;
+    toasterTimeout: any = null;
   teams: TeamData[] = [];
 
   winnerModalOpen = false;
   winnerTeam: TeamData | null = null;
+  hasPlayedAtLeastOneRound = false;
 
   constructor() {
     // Try to read team names from localStorage
@@ -83,12 +87,30 @@ export class Landingpage {
     const maxOtherBid = Math.max(0, ...otherBids.filter(b => b > 0));
     if (amount <= maxOtherBid) {
       // Reject bid: do not update currentBid
-      alert(`Bid must be greater than ₹${maxOtherBid}`);
+      this.showToaster(`Bid must be greater than ${maxOtherBid}`);
       return;
     }
     // Accept bid only if valid
     team.currentBid = amount;
     console.log(`Team ${teamId} placed bid: ${amount}. Can lock: ${this.canLock()}`);
+  }
+
+  showToaster(message: string) {
+    this.toasterMessage = message;
+    if (this.toasterTimeout) {
+      clearTimeout(this.toasterTimeout);
+    }
+    this.toasterTimeout = setTimeout(() => {
+      this.toasterMessage = null;
+    }, 4500);
+  }
+
+  closeToaster() {
+    this.toasterMessage = null;
+    if (this.toasterTimeout) {
+      clearTimeout(this.toasterTimeout);
+      this.toasterTimeout = null;
+    }
   }
 
   onTimerFinished() {
@@ -142,6 +164,7 @@ export class Landingpage {
       }
 
       this.isProcessingResult = false;
+      this.hasPlayedAtLeastOneRound = true;
     }, 3000);
   }
 
@@ -167,5 +190,6 @@ export class Landingpage {
     this.winnerModalOpen = false;
     this.winnerTeam = null;
   }
+
 
 }
