@@ -1,36 +1,81 @@
-<div class="team-selection-container">
-  <h2 class="title">Select Teams for Sarkaar 👑</h2>
+<div class="team-selection-layout" [class.split-layout]="currentInputIndex > 0">
 
-  <div class="dropdown-section">
-    <label for="teamCount">Number of Teams</label>
-    <select
-      id="teamCount"
-      [(ngModel)]="teamCount"
-      (change)="onTeamCountChange()"
-    >
-      <option *ngFor="let n of teamNumbers" [value]="n">{{ n }}</option>
-    </select>
+  <!-- Main selection card -->
+  <div class="team-selection-container">
+    <h2 class="title">Select Teams for Sarkaar 👑</h2>
+
+    <div class="dropdown-section">
+      <label for="teamCount">Number of Teams</label>
+      <select id="teamCount" [(ngModel)]="teamCount" (change)="onTeamCountChange()">
+        <option *ngFor="let n of teamNumbers" [value]="n">{{ n }}</option>
+      </select>
+    </div>
+
+    <div class="dropdown-section">
+      <label for="maxBid">Maximum Bid Amount</label>
+      <input
+        id="maxBid"
+        type="number"
+        min="100"
+        [(ngModel)]="maxBid"
+        placeholder="Enter max bid (e.g. 1000)"
+        class="no-spinner"
+      />
+    </div>
+
+    <div class="dropdown-section">
+      <label for="stepCount">Step Up/Down Amount</label>
+      <select id="stepCount" [(ngModel)]="stepCount">
+        <option *ngFor="let s of stepOptions" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+
+    <div class="team-names-section" *ngIf="currentInputIndex < teamCount">
+      <div class="team-name-input">
+        <label>Team {{ currentInputIndex + 1 }}</label>
+        <input
+          [(ngModel)]="teamNames[currentInputIndex]"
+          name="teamName{{ currentInputIndex }}"
+          placeholder="Enter team name"
+          (keyup.enter)="nextTeamInput()"
+          autofocus
+        />
+        <div *ngIf="nameError" class="team-name-error">{{ nameError }}</div>
+
+        <div class="input-nav-btns">
+          <button
+            type="button"
+            (click)="nextTeamInput()"
+            [disabled]="teamNames[currentInputIndex].trim().length === 0"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button class="proceed-btn" (click)="proceed()" [disabled]="!canProceed()">
+      Proceed 🚀
+    </button>
   </div>
 
-  <div class="team-names-section">
+  <!-- RIGHT SIDE: Team name cards -->
+
+
+  <div class="team-names-side-panel-group" *ngIf="filledTeamNameGroups && filledTeamNameGroups.length > 0">
     <div
-      *ngFor="let name of teamNames; let i = index; trackBy: trackByIndex"
-      class="team-name-input"
+      class="team-names-side-panel"
+      *ngFor="let group of filledTeamNameGroups; let groupIdx = index"
+      [style.marginLeft.px]="groupIdx === 0 ? 0 : 24"
     >
-      <label>Team {{ i + 1 }}</label>
-      <input
-        [(ngModel)]="teamNames[i]"
-        name="teamName{{ i }}"
-        placeholder="Enter team name"
-      />
+      <div
+        class="team-name-card visible"
+        *ngFor="let name of group; let i = index"
+      >
+        <span>Team {{ groupIdx * 5 + i + 1 }}: {{ name }}</span>
+      </div>
     </div>
   </div>
 
-  <button
-    class="proceed-btn"
-    (click)="proceed()"
-    [disabled]="!canProceed()"
-  >
-    Proceed 🚀
-  </button>
+
 </div>

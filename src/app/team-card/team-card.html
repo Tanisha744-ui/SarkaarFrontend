@@ -1,11 +1,8 @@
-<div
-  class="team-card"
-  [ngClass]="{
+<div class="team-card" [ngClass]="{
     active: isActive,
     correct: resultState === 'correct',
     wrong: resultState === 'wrong'
-  }"
->
+  }">
   <div class="card-header">
     <h2>{{ team.name }}</h2>
   </div>
@@ -13,36 +10,31 @@
   <div class="card-body">
     <div class="balance-section">
       <span class="balance-label">Balance</span>
-      <span class="balance-amount">₹{{ team.balance }}</span>
+      <span class="balance-amount">{{ team.balance }}</span>
     </div>
 
     <div class="current-bid" *ngIf="team.currentBid !== undefined">
       <span class="bid-label">Current Bid</span>
-      <span class="bid-amount">₹{{ team.currentBid }}</span>
+      <span class="bid-amount">{{ team.currentBid }}</span>
     </div>
 
     <div class="bid-section">
-      <input
-        type="number"
-        [(ngModel)]="currentBidAmount"
-        [max]="team.balance"
-        min="0"
-        step="1"
-        class="bid-input"
-        [disabled]="isLocked"
-        placeholder="Enter bid"
-      />
+      <div class="bid-input-spinner-wrapper">
+        <input type="number" [(ngModel)]="currentBidAmount" [max]="team.balance" min="0" class="bid-input with-spinner"
+          [disabled]="isLocked" placeholder="Enter bid" />
+        <div class="custom-spinner-btns">
+          <button class="spinner-btn up" (click)="changeBid('up')" [disabled]="isLocked || (currentBidAmount ?? 0) >= team.balance">&#9650;</button>
+          <button class="spinner-btn down" (click)="changeBid('down')" [disabled]="isLocked || (currentBidAmount ?? 0) <= 0">&#9660;</button>
+        </div>
+      </div>
 
-      <button
-        class="bid-button"
-        (click)="onBidSubmit(currentBidAmount ?? 0)"
-        [disabled]="isLocked || isBidExceedingBalance()"
-      >
+      <button class="bid-button" (click)="onBidSubmit(currentBidAmount ?? 0)"
+        [disabled]="isLocked || isBidExceedingBalance()">
         Place Bid
       </button>
 
       <small *ngIf="isBidExceedingBalance()" class="error-text">
-        Max bid: ₹{{ team.balance }}
+        Max bid: {{ team.balance }}
       </small>
     </div>
 

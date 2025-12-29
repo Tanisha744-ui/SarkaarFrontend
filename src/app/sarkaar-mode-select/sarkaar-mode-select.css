@@ -1,0 +1,64 @@
+
+.mode-select-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  color: #e0e0e0;
+}
+
+.mode-select-card {
+  background: #1f1f2e;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  padding: 3rem 2.5rem 2.5rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 340px;
+  max-width: 95vw;
+}
+
+.mode-select-card h2 {
+  color: #00f0ff;
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.mode-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.mode-btn {
+  font-size: 1.15rem;
+  padding: 1rem 0;
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+  margin-bottom: 0.5rem;
+}
+.mode-btn.offline {
+  background: linear-gradient(90deg, #00c6fb 0%, #7f53ac 100%);
+  color: #fff;
+}
+.mode-btn.online {
+  background: linear-gradient(90deg, #00c6fb 0%, #7f53ac 100%);
+  color: #fff;
+}
+.mode-btn:hover {
+  filter: brightness(1.08);
+  background: linear-gradient(90deg, #7f53ac 0%, #00c6fb 100%);
+}

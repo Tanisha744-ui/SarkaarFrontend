@@ -1,5 +1,84 @@
+/* Custom spinner buttons inside input */
+.bid-input-spinner-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.bid-input.with-spinner {
+  padding-right: 38px;
+}
+
+.custom-spinner-btns {
+  position: absolute;
+  right: 8px;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  height: 85%;
+}
+
+.spinner-btn {
+  width: 26px;
+  height: 15px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.2s;
+  line-height: 1;
+}
+.spinner-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* Hide browser default number input spinners */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Bid input group for custom step buttons */
+.bid-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.bid-step-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #0ea5e9;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.bid-step-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.answer-section .tick:disabled,
+.answer-section .cross:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+  box-shadow: none;
+}
 .team-card {
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(139, 152, 185, 0.15);
   backdrop-filter: blur(14px);
   border-radius: 18px;
   padding: 20px;

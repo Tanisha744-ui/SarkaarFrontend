@@ -20,7 +20,14 @@ export class Dashboard {
   userName: string = '';
   joinedTeam: string | null = null;
 
+  maxBid: number = 1000;
+
   constructor(private router: Router) {}
+
+  ngOnInit() {
+    const maxBidStr = localStorage.getItem('maxBid');
+    this.maxBid = maxBidStr ? parseInt(maxBidStr, 10) : 1000;
+  }
 
   createTeam() {
     if (

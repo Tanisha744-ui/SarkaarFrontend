@@ -1,20 +1,22 @@
 .timer-container {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 8px;
-	padding: 12px;
-	background: rgba(255,255,255,0.95);
-	border-radius: 12px;
-	box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-	width: 180px;
-	border: 2px solid #ffb347;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  background: linear-gradient(135deg, #0b0f1a 80%, #22d3ee 120%);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px #22d3ee21, 0 1.5px 0 0 #22d3ee;
+  width: 150px;
+  border: 2px solid #22d3ee;
 }
 
 .time-display {
 	font-size: 1.6rem;
 	font-weight: 700;
-	color: #222;
+	color: #22d3ee;
+	letter-spacing: 1.2px;
+	text-shadow: 0 1px 8px #0b0f1a99;
 }
 
 .controls {
@@ -28,19 +30,28 @@
 	border: none;
 	cursor: pointer;
 	font-weight: 600;
+	background: #13203b;
+	color: #22d3ee;
+	transition: background 0.18s, color 0.18s;
+	outline: none;
 }
 
 .controls button.start {
-	background: #4caf50;
-	color: white;
+  background: #164e63;
+  color: #38bdf8;
 }
 
 .controls button.start:disabled {
-	background: #9ccc9c;
+	background: #1e293b;
+	color: #64748b;
 	cursor: not-allowed;
 }
 
 .controls button.restart {
-	background: #f44336;
-	color: white;
+	background: #0e7490;
+	color: #f0fdfa;
+}
+.controls button:hover:not(:disabled) {
+	background: #22d3ee;
+	color: #0b0f1a;
 }
