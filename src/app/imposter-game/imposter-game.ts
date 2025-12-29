@@ -1,352 +1,329 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ImposterGameService } from '../services/ImposterGameService';
+import { LobbyService } from '../services/LobbyService';
+
+type Step =
+  | 'home'
+  | 'create'
+  | 'join'
+  | 'lobby'
+  | 'word'
+  | 'mode'
+  | 'offline'
+  | 'clue-entry'
+  | 'clue-review'
+  | 'voting'
+  | 'result';
 
 @Component({
   selector: 'app-imposter-game',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './imposter-game.html',
-  styleUrls: ['./imposter-game.css'],
+  styleUrls: ['./imposter-game.css']
 })
-export class ImposterGame implements OnDestroy, OnInit {
-  step: number = 0;
-  playerCount: number = 3;
-  currentPlayerIndex: number = 0;
-  playerNames: string[] = [];
-  tempName: string = '';
-  gameId: string = '';
-  playerId: string = '';
-  name: string = '';
-  word: string = '';
-  isImposter: boolean = false;
-  clue: string = '';
+export class ImposterGame implements OnInit, OnDestroy {
 
-  clues: any[] = [];
-  myClue = '';
-  myVote = '';
-  players: any[] = []; // Replace with your actual player model
-  cluesSubmitted = false;
-  votesSubmitted = false;
-  result: any = null;
-  resultPollInterval: any = null;
-  pollInterval: any = null;
+  // ======================
+  // STATE
+  // ======================
+  step: Step = 'home';
 
-  voteTurnIndex: number = 0;
-  clueTurnIndex: number = 0; // Added to fix property error
-  cluePhaseComplete: boolean = false; // Added to fix property error
-  votePhaseComplete: boolean = false; // Added to fix property error
-  nextPlayerIndex: number = 0; // Added to fix property error
-  showPassScreen: boolean = false; // Added to fix property error
+  // Player
+  playerName = '';
+  isHost = false;
 
-  phase: 'setup' | 'clue' | 'vote' | 'done' = 'setup';
-  currentTurn: number = 0;
-  showPassCard: boolean = false;
+  // Lobby
+  lobbyCode = '';
+  maxPlayers = 3;
+  players: string[] = [];
 
-  constructor(private gameService: ImposterGameService) { }
+  // Word
+  word = '';
+  isImposter = false;
+  showWord = false;
+  wordTimer = 10;
+  private interval: any;
+  wordDuration = 10; // seconds
+  wordStartTime = 0;
 
-  ngOnInit() {
-    // Do not start polling here. Polling will start after game creation or registration.
-  }
+  // Clue
+  clues: { [player: string]: string } = {};
+  myClue: string = '';
+  clueTimer: number = 15;
+  private clueInterval: any;
 
-  ngOnDestroy() {
-    if (this.resultPollInterval) {
-      clearInterval(this.resultPollInterval);
-      this.resultPollInterval = null;
-    }
-  }
+  // Result
+  imposterName: string | null = null;
+  imposterMessage: string = ''; // Add this property to your component
+  isAdmin = false; // set this based on lobby creator
+  imposterRevealed = false;
 
-  // Step 0: Ask for player count
-  setPlayerCount() {
-    this.playerNames = [];
-    this.currentPlayerIndex = 0;
-    this.step = 1;
-  }
+  round: number = 1;
+  proceedVotes: { [player: string]: 'next' | 'vote' } = {};
 
-  // Step 1: Enter each player name
-  addPlayerName() {
-    if (this.tempName.trim()) {
-      this.playerNames.push(this.tempName.trim());
-      this.tempName = '';
-      this.currentPlayerIndex++;
-    }
-  }
+  votedFor: string | null = null;
+  votes: { [player: string]: string } = {};
 
-  createGame() {
-    this.gameService.createGame(this.playerNames).subscribe(res => {
-      this.gameId = res.gameId;
+  votingResult: { imposterCaught: boolean, accused: string, imposter: string } | null = null;
 
-      // fetch players created in backend
-      this.gameService.getPlayers(this.gameId).subscribe(players => {
-        this.players = players;
+  constructor(private lobbyService: LobbyService) { }
 
-        // set first player
-        this.currentPlayerIndex = 0;
-        this.playerId = this.players[0].playerId;
+  // ======================
+  // INIT
+  // ======================
+  ngOnInit(): void {
 
-        this.step = 3; // move to waiting/start screen
-      });
+    // 🔔 Lobby created (HOST)
+    this.lobbyService.onLobbyCreated(code => {
+      this.lobbyCode = code;
+      this.isHost = true;
+      this.isAdmin = true; // 🔑 ADMIN SET HERE
+      this.players = [this.playerName];
+      this.step = 'lobby';
+
+    });
+
+    // 🔔 Player joined
+    this.lobbyService.onPlayerJoined((name) => {
+      if (!this.players.includes(name)) {
+        this.players.push(name);
+      }
+    });
+
+    // 🔔 All players joined → auto start
+    this.lobbyService.onAllPlayersJoined(players => {
+      this.players = players;
+      this.step = 'word'; // Ensure all players go to word phase
+      this.lobbyService.requestWord(this.lobbyCode);
+    });
+
+    // 🔔 Word assigned (PRIVATE)
+    this.lobbyService.onWordAssigned((data: { word: string; isImposter: boolean; wordStartTime: number }) => {
+      this.word = data.word;
+      this.isImposter = data.isImposter;
+      this.step = 'word';
+      this.showWord = true;
+      this.startWordTimer();
+    });
+
+
+
+
+    // 🔔 Mode selected by host
+    this.lobbyService.onModeSelected(mode => {
+      if (mode === 'offline') {
+        this.step = 'offline';
+      } else if (mode === 'online') {
+        this.step = 'clue-entry';
+        this.myClue = '';
+      }
+    });
+
+    // 🔔 Imposter revealed (OFFLINE)
+    this.lobbyService.onImposterRevealed(name => {
+      this.imposterName = name;
+      this.imposterRevealed = true; // 🔥 THIS WAS MISSING
+    });
+
+    this.lobbyService.onAllCluesSubmitted((clues) => {
+      this.clues = clues;
+      this.step = 'clue-review';
+      this.startClueReviewTimer();
+    });
+
+    this.lobbyService.onStartNextRound(() => {
+      this.round++;
+      this.myClue = '';
+      this.clues = {};
+      this.step = 'clue-entry';
+      this.proceedVotes = {};
+    });
+
+    this.lobbyService.onProceedToVoting(() => {
+      this.step = 'voting'; // You need to implement the voting UI/logic
+      this.proceedVotes = {};
+    });
+
+    this.lobbyService.onVotingResult((imposterCaught, accused, imposter) => {
+      this.votingResult = { imposterCaught, accused, imposter };
+      this.step = 'result';
     });
   }
 
-  startGame() {
-    this.gameService.startGame(this.gameId).subscribe(() => {
-
-      // MAKE SURE players exist
-      this.gameService.getPlayers(this.gameId).subscribe(players => {
-        this.players = players;
-
-        this.currentPlayerIndex = 0;
-        this.playerId = this.players[0].playerId;
-
-        // Start with PASS SCREEN for first clue
-        this.clueTurnIndex = 0;
-        this.nextPlayerIndex = 0;
-        this.showPassScreen = true;
-        this.step = 4.5;
-
-
-        this.pollInterval = setInterval(() => {
-          this.refreshTurnInfo();
-        }, 1000);
-      });
-    });
-  }
-  getWordAndRole() {
-    this.gameService
-      .getWord(this.gameId, this.playerId)
-      .subscribe(res => {
-        this.word = res.word;
-        this.isImposter = res.isImposter;
-      });
+  ngOnDestroy(): void {
+    clearInterval(this.interval);
   }
 
-  // Helper to check if it's this player's turn to give a clue
-  isMyClueTurn() {
-    if (!this.players || this.players.length === 0) return false;
-    return this.players[this.clueTurnIndex]?.playerId === this.playerId;
+  // ======================
+  // HOME
+  // ======================
+  goCreate(): void {
+    this.resetGameState();
+    this.step = 'create';
+  }
+
+  goJoin(): void {
+    this.resetGameState();
+    this.step = 'join';
+  }
+  copyCode(): void {
+    navigator.clipboard.writeText(this.lobbyCode);
+  }
+
+  private resetGameState(): void {
+    this.word = '';
+    // this.showWord = false;
+
+    this.wordTimer = 10;
+    clearInterval(this.interval);
+
+    this.lobbyCode = '';
+    this.players = [];
+    this.isHost = false;
+    this.isAdmin = false;
+
+    this.imposterName = null;
+    this.imposterRevealed = false;
   }
 
 
-  // Helper to check if this player is the imposter (after all clues are in)
+  // ======================
+  // CREATE / JOIN
+  // ======================
+  async createLobby(): Promise<void> {
+    if (!this.playerName || this.maxPlayers < 3) return;
+    await this.lobbyService.createLobby(this.playerName, this.maxPlayers);
+  }
+
+  joinLobby(): void {
+    if (!this.playerName || !this.lobbyCode) return;
+
+    this.isAdmin = false;
+    this.isHost = false;
+
+    this.lobbyService.joinLobby(this.lobbyCode, this.playerName);
+    this.step = 'lobby';
+  }
+
+
+  // ======================
+  // WORD PHASE
+  // ======================
+  startWordPhase(): void {
+    this.step = 'word';
+    this.lobbyService.requestWord(this.lobbyCode);
+  }
+
+  private startWordTimer(): void {
+    clearInterval(this.interval);
+
+    this.showWord = true;
+    this.wordTimer = 10;
+
+    this.interval = setInterval(() => {
+      this.wordTimer--;
+
+      if (this.wordTimer <= 0) {
+        clearInterval(this.interval);
+        this.showWord = false;
+
+        if (this.isHost) {
+          this.step = 'mode';
+        }
+      }
+    }, 1000);
+  }
+
+  // ======================
+  // MODE
+  // ======================
+  chooseMode(mode: 'online' | 'offline'): void {
+    this.lobbyService.selectMode(this.lobbyCode, mode);
+  }
+
+  // ======================
+  // OFFLINE RESULT
+  // ======================
+  getImposterName(): string {
+    return this.imposterName ?? 'Hidden';
+  }
   revealImposter() {
-    if (!this.cluePhaseComplete) return false;
-    // Optionally, you can add logic to highlight the imposter after clues
-    return this.isImposter;
+    this.lobbyService.revealImposter(this.lobbyCode);
+    // this.imposterRevealed = true;
+  }
+  startGameIfReady(): string {
+    return '';
   }
 
+  private resetWordState(): void {
+    this.word = '';
+    this.showWord = false;
+    this.wordTimer = 10;
+  }
+
+  // ======================
+  // SYNC WORD TIMER
+  // ======================
+  private syncWordTimer(): void {
+    clearInterval(this.interval);
+
+    const now = Math.floor(Date.now() / 1000);
+
+    if (!this.wordStartTime || isNaN(this.wordStartTime)) {
+      // 🛡 SAFETY FALLBACK
+      this.wordStartTime = now;
+    }
+
+    const elapsed = now - this.wordStartTime;
+    const remaining = Math.max(this.wordDuration - elapsed, 0);
+
+    this.wordTimer = remaining;
+    this.showWord = remaining > 0;
+
+    this.interval = setInterval(() => {
+      this.wordTimer--;
+
+      if (this.wordTimer <= 0) {
+        clearInterval(this.interval);
+        this.wordTimer = 0;
+        this.showWord = false;
+
+        if (this.isHost) {
+          this.step = 'mode';
+        }
+      }
+    }, 1000);
+  }
 
   submitClue() {
-    this.gameService
-      .submitClue(this.gameId, this.playerId, this.myClue)
-      .subscribe(() => {
-        this.myClue = '';
-
-        // 🔥 refresh turn info
-        this.gameService.getTurnInfo(this.gameId).subscribe(turn => {
-          this.clueTurnIndex = turn.clueTurnIndex;
-          this.cluePhaseComplete = turn.cluePhaseComplete;
-
-          this.gameService.getPlayers(this.gameId).subscribe(players => {
-            this.players = players;
-
-            if (this.cluePhaseComplete) {
-              this.step = 5; // show all clues page
-              this.refreshPlayersAndClues();
-            } else {
-              // Show pass screen before next clue
-              this.nextPlayerIndex = this.clueTurnIndex;
-              this.showPassScreen = true;
-              this.step = 4.5;
-            }
-
-          });
-        });
-      });
+    if (this.myClue.trim()) {
+      this.lobbyService.submitClue(this.lobbyCode, this.playerName, this.myClue.trim());
+      // Mark as submitted
+      this.clues[this.playerName] = this.myClue.trim();
+    }
   }
 
-  // Called when user clicks to proceed from all clues page to voting
-  proceedToVotingPhase() {
-  this.voteTurnIndex = 0;
-  this.showPassScreen = true;
-  this.step = 6.5; // pass screen before voting
-}
-
-
-  proceedToNextClue() {
-  const nextPlayer = this.players[this.nextPlayerIndex];
-  if (nextPlayer) {
-    this.playerId = nextPlayer.playerId;
-    this.getWordAndRole();
-  }
-
-  this.showPassScreen = false;
-  this.step = 4; // Clue screen
-}
-
-
-
-
-  // Call this after registering and after submitting a clue or vote
-  refreshPlayersAndClues() {
-    this.gameService.getPlayers(this.gameId).subscribe(players => {
-      this.players = players;
-      this.cluesSubmitted = players.every(p => p.clue);
-      this.votesSubmitted = players.every(p => p.hasVoted);
-
-      // Advance voting phase if all have voted
-      if (this.step === 5 && this.votesSubmitted) {
-        this.pollForResult();
+  startClueReviewTimer() {
+    this.clueTimer = 15;
+    clearInterval(this.clueInterval);
+    this.clueInterval = setInterval(() => {
+      this.clueTimer--;
+      if (this.clueTimer <= 0) {
+        clearInterval(this.clueInterval);
+        // Proceed to next phase if needed
       }
-    });
-    this.gameService.getClues(this.gameId).subscribe(clues => {
-      this.clues = clues;
-    });
+    }, 1000);
   }
 
-  // Voting logic: only current voter can vote, then advance turn
-  vote(suspectId: string) {
-    if (this.players[this.voteTurnIndex]?.playerId !== this.playerId) {
-      return;
-    }
-
-    this.gameService.vote(this.gameId, this.playerId, suspectId)
-      .subscribe({
-        next: () => {
-          this.myVote = suspectId;
-
-          // 🔥 Always refresh backend state
-          this.refreshTurnInfo();
-
-          // 🔥 Show pass device screen
-          // this.showPassScreen = true;
-          // this.step = 6.5;
-        },
-        error: () => {
-          // Even if already voted, sync state
-          this.refreshTurnInfo();
-        }
-      });
+  proceedOrNextRound(action: 'next' | 'vote') {
+    this.proceedVotes[this.playerName] = action;
+    this.lobbyService.proceedOrNextRound(this.lobbyCode, this.playerName, action);
   }
 
-  proceedToNextVote() {
-    const nextPlayer = this.players[this.voteTurnIndex];
-    if (!nextPlayer) return;
-
-    this.playerId = nextPlayer.playerId;
-    this.showPassScreen = false;
-    this.step = 6;
+  voteFor(player: string) {
+    this.votedFor = player;
+    this.lobbyService.voteFor(this.lobbyCode, this.playerName, player);
   }
-  loadResult() {
-    this.gameService.getResult(this.gameId).subscribe(res => {
-      this.result = {
-        ...res,
-        imposterCaught: res.isImposterCaught
-      };
-
-      this.showPassScreen = false;   // ✅ ADD THIS
-      this.step = 7;
-    });
-  }
-
-
-
-
-  // Switch device to current vote-turn player
-  switchToVoteTurnPlayer() {
-    const currentPlayer = this.players[this.voteTurnIndex];
-    if (!currentPlayer) return;
-    this.playerId = currentPlayer.playerId;
-  }
-
-  // Poll for result after voting is complete
-  pollForResult() {
-    if (this.resultPollInterval) return;
-    this.resultPollInterval = setInterval(() => {
-      this.gameService.getResult(this.gameId).subscribe(res => {
-        if (res && res.finished) {
-          this.result = res;
-          this.step = 6;
-          clearInterval(this.resultPollInterval);
-          this.resultPollInterval = null;
-        }
-      });
-    }, 2000);
-  }
-
-  refreshTurnInfo() {
-    this.gameService.getTurnInfo(this.gameId).subscribe(turn => {
-      this.voteTurnIndex = turn.voteTurnIndex;
-      this.votePhaseComplete = turn.votePhaseComplete;
-
-      // ✅ If voting finished → show result
-      if (this.votePhaseComplete) {
-        this.gameService.getResult(this.gameId).subscribe(result => {
-          this.result = {
-            ...result,
-            imposterCaught: result.isImposterCaught
-          };
-
-          this.showPassScreen = false;   // ✅ ADD THIS
-          this.step = 7;
-        });
-      }
-
-    });
-  }
-
-  switchToCurrentTurnPlayer() {
-    // Find the next player who hasn't submitted a clue yet
-    const nextIndex = this.clueTurnIndex;
-    const nextPlayer = this.players[nextIndex];
-    if (!nextPlayer) return undefined;
-
-    this.playerId = nextPlayer.playerId;
-    // Re-fetch word for the new player
-    this.getWordAndRole();
-    // Optionally, reset myClue for the new player
-    this.myClue = '';
-  }
-
-  getImposterName(): string {
-    if (!this.result || !this.result.imposterId || !this.players) { return 'Unknown'; }
-    const imposter = this.players.find(p => p.playerId === this.result.imposterId);
-    if (imposter && imposter.name) {
-      return imposter.name;
-    }
-    return 'Unknown';
-  }
-
-  startCluePhase() {
-    this.phase = 'clue';
-    this.currentTurn = 0;
-    this.showPassCard = true;
-  }
-
-  nextClueTurn() {
-    if (this.currentTurn < this.players.length - 1) {
-      this.currentTurn++;
-      this.showPassCard = true;
-    } else {
-      this.phase = 'vote';
-      this.currentTurn = 0;
-      this.showPassCard = true;
-    }
-  }
-
-  nextVoteTurn() {
-    if (this.currentTurn < this.players.length - 1) {
-      this.currentTurn++;
-      this.showPassCard = true;
-    } else {
-      this.phase = 'done';
-      // Show results, etc.
-    }
-  }
-
-  confirmPass() {
-    this.showPassCard = false;
-  }
-
 }
