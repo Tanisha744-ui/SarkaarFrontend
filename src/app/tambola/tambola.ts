@@ -13,9 +13,7 @@ import { MatDialog, MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angu
 })
 export class Tambola {
   numPlayers: number = 2;
-  playerNames: string[] = [];
-
-  constructor(private router: Router, private dialog: MatDialog) {
+  playerNames: string[] = [];  constructor(private router: Router, @Inject(MatDialog) private dialog: MatDialog) {
     this.updatePlayerFields();
   }
 
@@ -38,12 +36,13 @@ export class Tambola {
       width: '300px'
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
         this.router.navigate(['/tambola-game'], {
           queryParams: {
             interval: result.interval,
-            autoCall: result.autoCall // Pass Auto Call state as query parameter
+            autoCall: result.autoCall, // Pass Auto Call state as query parameter
+            announceNumbers: result.announceNumbers // Pass Announce Numbers state as query parameter
           }
         });
       }
@@ -76,6 +75,9 @@ export class Tambola {
         <label>
           <input type="checkbox" [(ngModel)]="autoCallEnabled" checked /> Enable Auto Call
         </label>
+        <label>
+          <input type="checkbox" [(ngModel)]="announceNumbersEnabled" /> Announce Numbers
+        </label>
       </div>
       <div mat-dialog-actions>
         <button mat-button class="cancel-button" (click)="onCancel()">Cancel</button>
@@ -87,7 +89,6 @@ export class Tambola {
     `.dialog-box {
       background: #1e1e2f;
       color: white;
-      border-radius: 20px;
       padding: 20px;
     }
     label {
@@ -115,17 +116,20 @@ export class DialogContent {
   intervals: number[] = [3, 5, 10, 15];
   selectedInterval: number = 3;
   autoCallEnabled: boolean = true; // Default Auto Call to ON
+  announceNumbersEnabled: boolean = false; // Default Announce Numbers to OFF
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<DialogContent>
-  ) {}
+  ) {
+    this.announceNumbersEnabled = data?.announceNumbers || false; // Initialize from data
+  }
 
   onCancel(): void {
     this.dialogRef.close(false); // Close dialog without action
   }
 
   onConfirm(): void {
-    this.dialogRef.close({ interval: this.selectedInterval, autoCall: this.autoCallEnabled }); // Pass both interval and Auto Call state
+    this.dialogRef.close({ interval: this.selectedInterval, autoCall: this.autoCallEnabled, announceNumbers: this.announceNumbersEnabled }); // Pass interval, Auto Call state, and Announce Numbers state
   }
 }

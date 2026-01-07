@@ -55,7 +55,7 @@
       <div class="current-number-card">
         <div class="current-number-header">
           <h3>Current Number</h3>
-          <button class="speaker-icon-button speaker" (click)="toggleSpeakerMode()" style="">
+          <button class="speaker-icon-button speaker" *ngIf="announceNumbersEnabled" (click)="toggleSpeakerMode()">
             <i *ngIf="speakerModeEnabled" class="fas fa-volume-up"></i>
             <i *ngIf="!speakerModeEnabled" class="fas fa-volume-mute"></i>
           </button>
@@ -73,6 +73,17 @@
           <span *ngFor="let number of randomNumbers.slice().reverse()" class="called-number">{{ number }}</span>
         </div>
       </div>
+
+      <!-- <div class="bonus-card">
+        <h3>Bonus Options</h3>
+        <div class="bonus-buttons">
+          <button class="bonus-button" (click)="onBonusOptionClick('firstLine')">First Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('secondLine')">Second Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('thirdLine')">Third Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('fullHouse')">Full House</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('corners')">Corners</button>
+        </div>
+      </div> -->
     </div>
   </div>
 
@@ -84,6 +95,16 @@
         </div>
       </div>
 </div>
+    <div class="bonus-card" *ngIf="isGameStarted">
+        <h3>Bonus Options</h3>
+        <div class="bonus-buttons">
+          <button class="bonus-button" (click)="onBonusOptionClick('firstLine')" [disabled]="disabledButtons['firstLine']">First Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('secondLine')" [disabled]="disabledButtons['secondLine']">Second Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('thirdLine')" [disabled]="disabledButtons['thirdLine']">Third Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('fullHouse')" [disabled]="disabledButtons['fullHouse']">Full House</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('earlyFive')" [disabled]="disabledButtons['earlyFive']">Early Five</button>
+        </div>
+      </div>
 
 <style>
   /* Removed inline CSS, moved to tambola-game.css */

@@ -25,6 +25,15 @@ export class TambolaGame implements OnDestroy, OnInit {
   isGameStarted: boolean = false; // Track whether the game has started
   callingInterval: number = 3; // Default calling interval in seconds
   speakerModeEnabled: boolean = true; // Default Speaker Mode to ON
+  announceNumbersEnabled: boolean = false; // Default Announce Numbers to OFF
+  isRestartPending: boolean = false; // Track if a restart is pending
+  disabledButtons: { [key: string]: boolean } = {
+    firstLine: false,
+    secondLine: false,
+    thirdLine: false,
+    fullHouse: false,
+    earlyFive: false,
+  };
 
   constructor(private route: ActivatedRoute, private router: Router) {
     this.route.queryParams.subscribe(params => {
@@ -32,6 +41,9 @@ export class TambolaGame implements OnDestroy, OnInit {
       this.playerNames = Array.isArray(params['names']) ? params['names'] : (params['names'] ? [params['names']] : []);
       this.callingInterval = +params['interval'] || this.callingInterval; // Use the interval from query params if provided
       this.autoCallEnabled = params['autoCall'] === 'true'; // Respect the autoCall parameter
+      this.announceNumbersEnabled = params['announceNumbers'] === 'true'; // Initialize Announce Numbers
+
+      console.log('Query Params:', params); // Debugging log to verify query parameters
 
       if (this.numPlayers > 0) {
         this.generateTickets();
@@ -43,6 +55,11 @@ export class TambolaGame implements OnDestroy, OnInit {
   ngOnInit() {
     this.initializeGame();
     this.isNumberGenerationScreen = true; // Ensure the grid is always displayed
+
+    // Ensure Speaker Mode is OFF if Announce Numbers is disabled
+    if (!this.announceNumbersEnabled) {
+      this.speakerModeEnabled = false;
+    }
 
     // Ensure Speaker Mode is ON by default and announce the current number
     if (this.speakerModeEnabled) {
@@ -143,6 +160,12 @@ export class TambolaGame implements OnDestroy, OnInit {
   }
 
   startNewGame() {
+    if (this.isRestartPending) {
+      this.isRestartPending = false; // Clear the restart flag
+      this.generateTickets(); // Regenerate tickets for players
+      this.assignTickets(); // Reassign tickets to players
+    }
+
     this.isGameStarted = true; // Mark the game as started
     this.showAutoCall = true;
 
@@ -160,6 +183,7 @@ export class TambolaGame implements OnDestroy, OnInit {
   }
 
   restartGame() {
+    this.isRestartPending = true; // Mark restart as pending
     this.stopAutoCall(); // Stop any ongoing Auto Call
     this.isGameStarted = false; // Reset the game state
     this.showAutoCall = false;
@@ -167,13 +191,6 @@ export class TambolaGame implements OnDestroy, OnInit {
     this.randomNumbers = []; // Reset called numbers
     this.currentNumber = "Waiting to start..."; // Reset the current number
     this.isNumberGenerationScreen = false; // Hide the number grid
-    this.generateTickets(); // Regenerate tickets for players
-    this.assignTickets(); // Reassign tickets to players
-
-    // Restore Auto Call based on the previous state
-    if (this.autoCallEnabled) {
-      this.startAutoCall(this.callingInterval * 1000); // Restart Auto Call if enabled
-    }
   }
 
   toggleAutoCall() {
@@ -211,6 +228,30 @@ export class TambolaGame implements OnDestroy, OnInit {
   }
 
   navigateToOffline() {
-    this.router.navigate(['/tambola-game']);
+    this.router.navigate(['/tambola-game'], {
+      queryParams: {
+        players: this.numPlayers,
+        names: this.playerNames,
+        interval: this.callingInterval,
+        autoCall: this.autoCallEnabled,
+        announceNumbers: this.announceNumbersEnabled // Include Announce Numbers in URL
+      }
+    }).then(() => {
+      console.log('Navigation successful with queryParams:', {
+        players: this.numPlayers,
+        names: this.playerNames,
+        interval: this.callingInterval,
+        autoCall: this.autoCallEnabled,
+        announceNumbers: this.announceNumbersEnabled
+      });
+    }).catch(err => {
+      console.error('Navigation error:', err);
+    });
+  }
+
+  onBonusOptionClick(option: string) {
+    console.log(`Bonus option selected: ${option}`);
+    this.disabledButtons[option] = true; // Disable the clicked button
+    // Add additional logic for handling the bonus option
   }
 }

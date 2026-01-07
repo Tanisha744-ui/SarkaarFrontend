@@ -726,3 +726,75 @@ label[for="speaker-mode-toggle"] {
 .speaker-icon-button:hover {
   color: #0056b3;
 }
+
+/* Styling for the bonus card */
+.bonus-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0px auto;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  min-width: 600px;
+  max-width: 600px;
+  max-height: 200px;
+  margin-bottom: 40px;
+}
+
+.bonus-card h3 {
+  font-size: 1.5em;
+  color: white;
+  margin-bottom: 10px;
+  margin-top: 0px;
+}
+
+/* Updated styling for bonus buttons layout */
+.bonus-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Three buttons in the first row */
+  gap: 0px;
+  justify-content: center;
+}
+
+.bonus-buttons .bonus-button:nth-child(4),
+.bonus-buttons .bonus-button:nth-child(5) {
+  margin-top: -20px;
+  grid-column: span 3; /* Center the last two buttons */
+  justify-self: center;
+  margin-bottom: 12px;
+}
+
+.bonus-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 50px;
+}
+
+.bonus-button {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+/* Styling for disabled bonus buttons */
+.bonus-button:disabled {
+  background: #cccccc !important; /* Light grey background */
+  color: #666666; /* Dark grey text */
+  cursor: not-allowed; /* Show not-allowed cursor */
+  box-shadow: none; /* Remove shadow */
+  transform: none; /* Remove hover scale effect */
+}
+
+.bonus-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
