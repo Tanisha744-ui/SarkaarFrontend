@@ -191,6 +191,15 @@ export class TambolaGame implements OnDestroy, OnInit {
     this.randomNumbers = []; // Reset called numbers
     this.currentNumber = "Waiting to start..."; // Reset the current number
     this.isNumberGenerationScreen = false; // Hide the number grid
+
+    // Reset disabledButtons state
+    this.disabledButtons = {
+      firstLine: false,
+      secondLine: false,
+      thirdLine: false,
+      fullHouse: false,
+      earlyFive: false,
+    };
   }
 
   toggleAutoCall() {
