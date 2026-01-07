@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { Subject } from 'rxjs';
+// import { SignalRService } from '../services/signalr.service';
 
 @Injectable({ providedIn: 'root' })
 export class LobbyService {
@@ -19,9 +20,11 @@ export class LobbyService {
   private imposterRevealed$ = new Subject<string>();
   private allCluesSubmitted$ = new Subject<{ [player: string]: string }>();
 
+  public lobbyCode: string = ''; // Stores the current lobby code
+
   constructor() {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5046/lobbyhub')
+      .withUrl('http://localhost:5046/lobbyHub') // Capital H
       .withAutomaticReconnect()
       .build();
 
@@ -35,6 +38,7 @@ export class LobbyService {
   private registerHandlers(): void {
 
     this.connection.on('LobbyCreated', (code: string) => {
+      this.lobbyCode = code; // Store the lobby code when created
       this.lobbyCreated$.next(code);
     });
 
@@ -45,6 +49,10 @@ export class LobbyService {
     this.connection.on('AllPlayersJoined', (players: string[]) => {
       this.allPlayersJoined$.next(players);
     });
+    this.connection.on('PlayersUpdated', (players: string[]) => {
+      this.allPlayersJoined$.next(players);
+    });
+
 
     // this.connection.on('WordAssigned', (word: string, isImposter: boolean) => {
     //   this.wordAssigned$.next({ word, isImposter });
@@ -56,6 +64,11 @@ export class LobbyService {
 
     this.connection.on('ImposterRevealed', (name: string) => {
       this.imposterRevealed$.next(name);
+    });
+
+    this.connection.on('LobbyError', (msg: string) => {
+      console.error('LobbyError:', msg);
+      alert('Lobby Error: ' + msg);
     });
   }
 
@@ -108,6 +121,10 @@ export class LobbyService {
     this.connection.on('VotingResult', cb);
   }
 
+  onSeeWordAgain(cb: () => void) {
+    this.connection.on('SeeWordAgain', cb);
+  }
+
 
   // ======================
   // CLIENT → SERVER
@@ -116,10 +133,12 @@ export class LobbyService {
   async createLobby(playerName: string, maxPlayers: number) {
     await this.connectionStarted;
     this.connection.invoke('CreateLobby', playerName, maxPlayers);
+    // Optionally set lobbyCode here if you get it synchronously, or set it in the handler below
   }
 
   async joinLobby(code: string, name: string) {
     await this.connectionStarted;
+    this.lobbyCode = code; // Store the lobby code when joining
     this.connection.invoke('JoinLobby', code, name);
   }
 
@@ -146,5 +165,31 @@ export class LobbyService {
   async voteFor(code: string, voter: string, votedPlayer: string) {
     await this.connectionStarted;
     this.connection.invoke('VoteFor', code, voter, votedPlayer);
+  }
+
+  async cleanupGame(gameId: string) {
+    // Adjust the URL as needed
+    await fetch(`http://localhost:5046/ImposterGame/cleanup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(gameId)
+    });
+  }
+
+  endGameAndCleanup() {
+    // Call this after showing the result
+    this.cleanupGame(this.lobbyCode); // Use the actual gameId if different
+  }
+
+  seeWordAgain(lobbyCode: string) {
+    this.connection.invoke('SeeWordAgain', lobbyCode);
+  }
+
+  joinAsViewer(lobbyCode: string) {
+    this.connection.invoke('JoinAsViewer', lobbyCode);
+  }
+
+  onViewerUpdate(cb: (data: any) => void) {
+    this.connection.on('ViewerUpdate', cb);
   }
 }

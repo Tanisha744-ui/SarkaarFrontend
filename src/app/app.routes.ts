@@ -3,17 +3,10 @@ import { Login } from './login/login';
 import { Signup } from './signup/signup';
 import { Landingpage } from './landingpage/landingpage';
 import { Index } from './index/index';
-
 import { Dashboard } from './dashboard/dashboard';
-
 import { ImposterGame } from './imposter-game/imposter-game';
 import { TambolaGame } from './tambola-game/tambola-game';
 import { Tambola } from './tambola/tambola';
-import { ImposterMode } from './imposter-mode/imposter-mode';
-import { ImposterOffline } from './imposter-offline/imposter-offline';
-
-
-
 import { TeamSelection } from './team-selection/team-selection';
 import { SarkaarModeSelect } from './sarkaar-mode-select/sarkaar-mode-select';
 import { SarkaarRoom } from './sarkaar-room/sarkaar-room';
@@ -28,9 +21,7 @@ export const routes: Routes = [
   { path: 'sarkaar-room', component: SarkaarRoom },
   { path: 'team-selection', component: TeamSelection },
   { path: 'game', component: Landingpage },
-  { path: 'imposter-mode', component: ImposterMode },
   { path: 'imposter-game', component: ImposterGame },
-  { path: 'imposter-offline', component: ImposterOffline },
   { path: 'tambola', component: Tambola },
   { path: 'tambola-game', component: TambolaGame }
 ];
