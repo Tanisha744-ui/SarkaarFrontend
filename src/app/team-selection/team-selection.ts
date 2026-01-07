@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-team-selection',
@@ -11,92 +11,70 @@ import { CommonModule } from '@angular/common';
   styleUrl: './team-selection.css',
 })
 export class TeamSelection {
-  teamCount: number = 2;
-  teamNumbers: number[] = Array.from({ length: 9 }, (_, i) => i + 2); // 2-10
-  teamNames = Array.from({ length: 2 }, () => '');
-  currentInputIndex: number = 0;
-  maxBid: number = 1000;
-  nameError: string = '';
-  stepOptions: number[] = [1, 2, 5, 10, 20, 25, 50, 100];
-  stepCount: number = 10;
+  teamCount = 2;
+  teamNumbers = Array.from({ length: 9 }, (_, i) => i + 2);
 
-  constructor(private router: Router) {
-    this.updateFilledTeamNamesAndGroups();
-  }
+  teamNames: string[] = ['', ''];
+  filledTeamNames: string[] = [];
+
+  currentInputIndex = 0;
+  maxBid = 1000;
+  stepCount = 10;
+  nameError = '';
+
+  constructor(private router: Router) {}
 
   onTeamCountChange() {
     this.teamNames = Array.from(
       { length: this.teamCount },
       (_, i) => this.teamNames[i] || ''
     );
-    if (this.currentInputIndex >= this.teamCount) {
-      this.currentInputIndex = this.teamCount - 1;
-    }
-    this.nameError = '';
-    this.updateFilledTeamNamesAndGroups();
-  }
-  filledTeamNames: string[] = [];
-  filledTeamNameGroups: string[][] = [];
 
-  updateFilledTeamNamesAndGroups() {
-    this.filledTeamNames = this.teamNames.slice(0, this.currentInputIndex).filter(name => name && name.trim().length > 0);
-    this.filledTeamNameGroups = [];
-    for (let i = 0; i < this.filledTeamNames.length; i += 5) {
-      this.filledTeamNameGroups.push(this.filledTeamNames.slice(i, i + 5));
-    }
+    this.currentInputIndex = Math.min(this.currentInputIndex, this.teamCount - 1);
+    this.updateFilledNames();
   }
 
-  // Call this method whenever teamNames or currentInputIndex changes
-  isDuplicateName(name: string, index: number): boolean {
-    const trimmed = name.trim().toLowerCase();
-    return (
-      trimmed.length > 0 &&
-      this.teamNames.some((n, i) => i !== index && n.trim().toLowerCase() === trimmed)
+  isDuplicate(name: string, index: number): boolean {
+    const n = name.trim().toLowerCase();
+    return this.teamNames.some(
+      (t, i) => i !== index && t.trim().toLowerCase() === n
     );
   }
 
   nextTeamInput() {
+    if (this.currentInputIndex >= this.teamCount) return;
     const name = this.teamNames[this.currentInputIndex].trim();
-    if (name.length === 0) {
-      this.nameError = '';
+    if (!name) return;
+
+    if (this.isDuplicate(name, this.currentInputIndex)) {
+      this.nameError = 'This team name already exists';
       return;
     }
-    if (this.isDuplicateName(name, this.currentInputIndex)) {
-      this.nameError = 'This name is already taken.';
-      return;
-    }
+
     this.nameError = '';
-    if (this.currentInputIndex < this.teamCount - 1) {
-      this.currentInputIndex++;
-    } else {
-      // All names entered, hide input
-      this.currentInputIndex++;
+    this.currentInputIndex++;
+    if (this.currentInputIndex > this.teamCount) {
+      this.currentInputIndex = this.teamCount;
     }
-    this.updateFilledTeamNamesAndGroups();
+    this.updateFilledNames();
   }
 
-  prevTeamInput() {
-    if (this.currentInputIndex > 0) {
-      this.currentInputIndex--;
-    }
-    this.nameError = '';
-    this.updateFilledTeamNamesAndGroups();
+  updateFilledNames() {
+    this.filledTeamNames = this.teamNames
+      .slice(0, Math.min(this.currentInputIndex, this.teamCount))
+      .filter(n => n.trim().length > 0);
   }
 
   canProceed(): boolean {
-    // All names must be filled, no duplicates, maxBid > 0, and input is hidden (user finished entering names)
-    const namesTrimmed = this.teamNames.map(n => n.trim().toLowerCase());
-    const uniqueNames = new Set(namesTrimmed.filter(n => n.length > 0));
+    const names = this.teamNames.map(n => n.trim());
     return (
-      this.teamNames.every(name => name.trim().length > 0) &&
-      uniqueNames.size === this.teamNames.length &&
-      this.maxBid > 0 &&
+      names.every(n => n.length > 0) &&
+      new Set(names).size === names.length &&
       this.currentInputIndex >= this.teamCount
     );
   }
 
   proceed() {
-    // Save team names to localStorage
     localStorage.setItem('teamNames', JSON.stringify(this.teamNames));
     localStorage.setItem('maxBid', String(this.maxBid));
     localStorage.setItem('stepCount', String(this.stepCount));

@@ -31,6 +31,9 @@ export class Login {
     };
     this.http.post('http://localhost:5046/login', payload).subscribe({
       next: (res: any) => {
+        if (res && res.token) {
+          localStorage.setItem('authToken', res.token);
+        }
         if (res && res.username && res.roleid) {
           localStorage.setItem('username', res.username);
           localStorage.setItem('roleid', res.roleid.toString());

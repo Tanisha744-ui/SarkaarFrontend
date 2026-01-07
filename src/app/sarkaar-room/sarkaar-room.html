@@ -6,17 +6,31 @@
   <div class="room-card" *ngIf="mode === 'none'">
     <h2>Play with Friends</h2>
     <div class="room-options">
-      <button class="room-btn create" (click)="selectMode('create')">Create Room</button>
-      <button class="room-btn join" (click)="selectMode('join')">Join Room</button>
+      <button class="room-btn create" (click)="selectMode('create')">Create Room (Lead)</button>
+      <button class="room-btn join" (click)="selectMode('join')">Join Room (Lead)</button>
+      <button class="room-btn team" (click)="selectMode('joinTeam')">Join Team (Member)</button>
     </div>
   </div>
 
   <!-- Create Room UI -->
-  <div *ngIf="mode === 'create' && !joined" class="room-card">
+  <div *ngIf="mode === 'create' && !joined" class="room-card room-create-wrapper">
     <h2>Create Room</h2>
-    <input [(ngModel)]="teamName" placeholder="Team Name" class="room-input" />
-    <button class="room-btn create" (click)="createRoom()" [disabled]="!teamName">Create & Join</button>
-    <button class="room-btn back" (click)="mode = 'none'">Back</button>
+    <div class="room-card room-create-card">
+      <h3>Bid Settings</h3>
+      <label>Max Bid Amount
+        <input type="number" [(ngModel)]="maxBidAmount" min="1" class="room-input" placeholder="e.g. 100" />
+      </label>
+      <label>Bid Interval (sec)
+        <input type="number" [(ngModel)]="bidInterval" min="1" class="room-input" placeholder="e.g. 10" />
+      </label>
+    </div>
+    <div class="room-create-main">
+      <input [(ngModel)]="teamName" placeholder="Team Name" class="room-input" />
+    </div>
+    <div class="room-create-actions">
+      <button class="room-btn create room-action-btn" (click)="createRoom()" [disabled]="!teamName">Create & Join</button>
+      <button class="room-btn back room-action-btn" (click)="mode = 'none'">Back</button>
+    </div>
   </div>
 
   <!-- Join Room UI -->
@@ -28,14 +42,37 @@
     <button class="room-btn back" (click)="mode = 'none'">Back</button>
   </div>
 
-  <!-- After joining, show code and teams -->
-  <div *ngIf="joined" class="room-card">
+
+  <!-- After joining, show codes and teams for host (lead) -->
+  <div *ngIf="joined && isLead" class="room-card">
     <h2>Room Code: <span class="room-code">{{ code }}</span></h2>
+    <h3>Your Team Code: <span class="room-code">{{ teamCode }}</span></h3>
     <h3>Teams Joined ({{ teams.length }}/10):</h3>
     <ul class="team-list">
       <li *ngFor="let t of teams">{{ t }}</li>
     </ul>
     <button class="room-btn proceed" (click)="proceedToGame()" [disabled]="teams.length < 2">Proceed to Game</button>
+    <button class="room-btn back" (click)="mode = 'none'">Back</button>
+  </div>
+
+  <!-- After joining, show waiting for host for non-lead teams -->
+  <div *ngIf="joined && !isLead" class="room-card">
+    <h2>Room Code: <span class="room-code">{{ code }}</span></h2>
+    <h3>Your Team Code: <span class="room-code">{{ teamCode }}</span></h3>
+    <h3>Teams Joined ({{ teams.length }}/10):</h3>
+    <ul class="team-list">
+      <li *ngFor="let t of teams">{{ t }}</li>
+    </ul>
+    <div class="waiting-host">Waiting for host to start the game...</div>
+    <button class="room-btn back" (click)="mode = 'none'">Back</button>
+  </div>
+
+  <!-- Team member join UI -->
+  <div *ngIf="mode === 'joinTeam' && !joined" class="room-card">
+    <h2>Join Team</h2>
+    <input [(ngModel)]="teamCodeInput" placeholder="Team Code" maxlength="8" class="room-input" />
+    <input [(ngModel)]="memberName" placeholder="Your Name" class="room-input" />
+    <button class="room-btn join" (click)="joinTeam()" [disabled]="!teamCodeInput || !memberName">Join Team</button>
     <button class="room-btn back" (click)="mode = 'none'">Back</button>
   </div>
 </div>

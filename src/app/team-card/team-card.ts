@@ -20,16 +20,17 @@ export class TeamCard implements OnChanges {
   @Input() team!: TeamData;
   @Input() isLocked: boolean = false;
   @Input() isActive: boolean = false;
-  
-@Input() highestBid: number = 0; // NEW: track highest bid
   @Input() answerEnabled: boolean = false;
   @Input() resultState: 'none' | 'correct' | 'wrong' = 'none';
+  // New inputs for bid logic
+  @Input() minimumBid: number = 0;
+  @Input() bidInterval: number = 10;
 
   @Output() bidChange = new EventEmitter<number>();
   @Output() answer = new EventEmitter<boolean>();
 
   currentBidAmount: number | undefined;
-  stepCount: number = 10;
+  stepCount: number = 10; // fallback, but use bidInterval if provided
   
   // Helper method to safely check if bid exceeds balance
   isBidExceedingBalance(): boolean {
@@ -40,11 +41,16 @@ export class TeamCard implements OnChanges {
     // Don't set initial value, let placeholder show
     this.currentBidAmount = undefined;
     this.setTeamBalanceFromMaxBid();
-    const stepStr = localStorage.getItem('stepCount');
-    if (stepStr) {
-      const step = parseInt(stepStr, 10);
-      if (!isNaN(step)) {
-        this.stepCount = step;
+    // Use bidInterval if provided
+    if (this.bidInterval && this.bidInterval > 0) {
+      this.stepCount = this.bidInterval;
+    } else {
+      const stepStr = localStorage.getItem('stepCount');
+      if (stepStr) {
+        const step = parseInt(stepStr, 10);
+        if (!isNaN(step)) {
+          this.stepCount = step;
+        }
       }
     }
   }
@@ -83,9 +89,26 @@ export class TeamCard implements OnChanges {
       this.bidChange.emit(0);
       return;
     }
-    // Clamp to balance
-    const validAmount = Math.max(0, Math.min(amount, this.team.balance));
-    this.bidChange.emit(validAmount);
+    const interval = this.bidInterval > 0 ? this.bidInterval : 10;
+    let roundedAmount = Math.round(amount / interval) * interval;
+    if (amount % interval === interval / 2) {
+      roundedAmount = Math.ceil(amount / interval) * interval;
+    }
+    // If entered amount is less than minimumBid, assign minimumBid
+    if (amount < this.minimumBid) {
+      roundedAmount = this.minimumBid;
+    }
+    // If entered amount is less than currentBid, assign next higher interval above currentBid
+    if (this.team.currentBid !== undefined && roundedAmount < this.team.currentBid) {
+      roundedAmount = Math.ceil((this.team.currentBid + 1) / interval) * interval;
+      if (roundedAmount < this.minimumBid) {
+        roundedAmount = this.minimumBid;
+      }
+    }
+    // Clamp to [minimumBid, balance]
+    roundedAmount = Math.max(this.minimumBid, Math.min(roundedAmount, this.team.balance));
+    this.currentBidAmount = roundedAmount;
+    this.bidChange.emit(roundedAmount);
   }
 
   onAnswer(correct: boolean) {
@@ -95,8 +118,18 @@ export class TeamCard implements OnChanges {
   changeBid(direction: 'up' | 'down') {
     if (this.isLocked) return;
     let value = this.currentBidAmount ?? 0;
-    const delta = direction === 'up' ? this.stepCount : -this.stepCount;
-    value += delta;
+    const step = this.bidInterval > 0 ? this.bidInterval : this.stepCount;
+    if (direction === 'up') {
+      // If value is less than minimumBid, jump to minimumBid
+      if (value < this.minimumBid) {
+        value = this.minimumBid;
+      } else {
+        value += step;
+      }
+    } else {
+      value -= step;
+    }
+    // Clamp to [0, balance]
     value = Math.max(0, Math.min(value, this.team.balance));
     this.currentBidAmount = value;
   }

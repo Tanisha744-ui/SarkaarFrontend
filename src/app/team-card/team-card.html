@@ -20,22 +20,18 @@
 
     <div class="bid-section">
       <div class="bid-input-spinner-wrapper">
-        <input type="number" [(ngModel)]="currentBidAmount" [max]="team.balance" min="0" class="bid-input with-spinner"
+        <input type="number" [(ngModel)]="currentBidAmount" [max]="team.balance" [min]="minimumBid" class="bid-input with-spinner"
           [disabled]="isLocked" placeholder="Enter bid" />
         <div class="custom-spinner-btns">
           <button class="spinner-btn up" (click)="changeBid('up')" [disabled]="isLocked || (currentBidAmount ?? 0) >= team.balance">&#9650;</button>
-          <button class="spinner-btn down" (click)="changeBid('down')" [disabled]="isLocked || (currentBidAmount ?? 0) <= 0">&#9660;</button>
+          <button class="spinner-btn down" (click)="changeBid('down')" [disabled]="isLocked || (currentBidAmount ?? 0) <= minimumBid">&#9660;</button>
         </div>
       </div>
 
       <button class="bid-button" (click)="onBidSubmit(currentBidAmount ?? 0)"
-        [disabled]="isLocked || isBidExceedingBalance()">
+        [disabled]="isLocked">
         Place Bid
       </button>
-
-      <small *ngIf="isBidExceedingBalance()" class="error-text">
-        Max bid: {{ team.balance }}
-      </small>
     </div>
 
     <div class="answer-section" *ngIf="isLocked && isActive">

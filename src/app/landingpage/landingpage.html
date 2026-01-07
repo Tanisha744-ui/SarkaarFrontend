@@ -15,9 +15,15 @@
 
   <div class="main-content-area">
     <div class="team-grid" [ngClass]="{'two-columns': teams.length === 2}">
-      <app-team-card *ngFor="let team of teams" [team]="team" [isLocked]="isGameLocked"
-        [isActive]="activeTeam === team.teamId" [answerEnabled]="!!roundTimer?.running"
-        [resultState]="results[team.teamId] || 'none'" (bidChange)="onBidPlaced($event, team.teamId)"
+      <app-team-card *ngFor="let team of teams"
+        [team]="team"
+        [isLocked]="isGameLocked"
+        [isActive]="activeTeam === team.teamId"
+        [answerEnabled]="!!roundTimer?.running"
+        [resultState]="results[team.teamId] || 'none'"
+        [minimumBid]="getMinimumBid(team.teamId)"
+        [bidInterval]="bidInterval"
+        (bidChange)="onBidPlaced($event, team.teamId)"
         (answer)="handleAnswer($event, team.teamId)">
       </app-team-card>
     </div>
@@ -26,19 +32,33 @@
       <button class="lock-button" (click)="lockBids()" [disabled]="!canLock()">
         🔒 Lock Bids
       </button>
-      <button class="winner-button" (click)="showWinner()" [disabled]="teams.length === 0" *ngIf="hasPlayedAtLeastOneRound">
+      <button class="winner-button" (click)="showWinner()" [disabled]="teams.length === 0"
+        *ngIf="hasPlayedAtLeastOneRound">
         🏆 Show Winner
       </button>
     </div>
-      <div class="winner-modal" *ngIf="winnerModalOpen">
-        <div class="winner-content animate-winner">
-          <h2>🏆 Winner</h2>
-          <div *ngIf="winnerTeam">
-            <p class="winner-name">{{ winnerTeam.name }}</p>
-            <p class="winner-bid">Balance: {{ winnerTeam.balance }}</p>
-          </div>
-          <button class="close-winner" (click)="closeWinnerModal()">Close</button>
+    <div class="winner-modal" *ngIf="winnerModalOpen">
+      <div class="winner-content animate-winner">
+        <h2>🏆 Winner</h2>
+        <div *ngIf="winnerTeam">
+          <p class="winner-name">{{ winnerTeam.name }}</p>
+          <p class="winner-bid">Balance: {{ winnerTeam.balance }}</p>
+        </div>
+        <button class="close-winner" (click)="closeWinnerModal()">Close</button>
+      </div>
+    </div>
+    <button *ngIf="isOnline && hasPlayedAtLeastOneRound" (click)="openEndGameConfirm()"
+      style="margin-top: 20px; background: #e74c3c; color: white;">End Game</button>
+
+    <div class="endgame-modal" *ngIf="endGameConfirmOpen">
+      <div class="endgame-content animate-winner">
+        <h2>End Game?</h2>
+        <p>Are you sure you want to end the game? This action cannot be undone.</p>
+        <div style="display: flex; gap: 16px; justify-content: center; margin-top: 20px;">
+          <button (click)="confirmEndGame()" style="background: #e74c3c; color: white;">End Game</button>
+          <button (click)="cancelEndGame()" style="background: #bdc3c7; color: #222;">Cancel</button>
         </div>
       </div>
+    </div>
   </div>
 </div>

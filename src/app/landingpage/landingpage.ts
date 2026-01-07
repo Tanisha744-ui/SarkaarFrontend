@@ -2,6 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { NgFor, NgIf, NgClass } from '@angular/common';
 import { TeamCard } from '../team-card/team-card';
 import { Timer } from '../timer/timer';
+import { HttpClient } from '@angular/common/http';
 
 interface TeamData {
   teamId: string;
@@ -18,16 +19,21 @@ interface TeamData {
   standalone: true
 })
 export class Landingpage {
-    // Toaster state
-    toasterMessage: string | null = null;
-    toasterTimeout: any = null;
+  // Toaster state
+  toasterMessage: string | null = null;
+  toasterTimeout: any = null;
   teams: TeamData[] = [];
+
+  // Bid interval (read from localStorage if set in team selection)
+  bidInterval: number = 10;
 
   winnerModalOpen = false;
   winnerTeam: TeamData | null = null;
   hasPlayedAtLeastOneRound = false;
 
-  constructor() {
+  isOnline: boolean = false;
+
+  constructor(private http: HttpClient) {
     // Try to read team names from localStorage
     const storedNames = localStorage.getItem('teamNames');
     let names: string[] = [];
@@ -35,7 +41,7 @@ export class Landingpage {
       if (storedNames) {
         names = JSON.parse(storedNames);
       }
-    } catch {}
+    } catch { }
     // Use provided names, fallback to default
     if (names.length >= 2 && names.length <= 10) {
       this.teams = names.map((name, idx) => ({
@@ -52,6 +58,16 @@ export class Landingpage {
         { teamId: 'D', name: 'Team D', balance: 100000, currentBid: undefined }
       ];
     }
+    // Read bid interval (stepCount) from localStorage if set in team selection
+    const storedStep = localStorage.getItem('stepCount');
+    if (storedStep) {
+      const parsed = parseInt(storedStep, 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        this.bidInterval = parsed;
+      }
+    }
+    // Detect online mode by checking if roomCode exists
+    this.isOnline = !!localStorage.getItem('roomCode');
   }
 
   isGameLocked: boolean = false;
@@ -61,16 +77,24 @@ export class Landingpage {
   // Checking whether all teams have placed a positive bid and
   // the maximum bid is unique (occurs exactly once)
   canLock(): boolean {
-  const bids = this.teams.map(t => t.currentBid);
-  // All teams must have entered a bid (including zero)
-  if (bids.some(b => b === undefined || b === null)) return false;
-  // Find all non-zero bids
-  const nonZeroBids = bids.filter(b => typeof b === 'number' && b > 0) as number[];
-  if (nonZeroBids.length === 0) return false; // At least one non-zero bid required
-  // The maximum non-zero bid must be unique
-  const max = Math.max(...nonZeroBids);
-  const maxCount = nonZeroBids.filter(b => b === max).length;
-  return maxCount === 1;
+    const bids = this.teams.map(t => t.currentBid);
+    // All teams must have entered a bid (including zero)
+    if (bids.some(b => b === undefined || b === null)) return false;
+    // Find all non-zero bids
+    const nonZeroBids = bids.filter(b => typeof b === 'number' && b > 0) as number[];
+    if (nonZeroBids.length === 0) return false; // At least one non-zero bid required
+    // The maximum non-zero bid must be unique
+    const max = Math.max(...nonZeroBids);
+    const maxCount = nonZeroBids.filter(b => b === max).length;
+    return maxCount === 1;
+  }
+
+  // Get the minimum allowed bid for a team (for increment button)
+  getMinimumBid(teamId: string): number {
+    // Find the current max non-zero bid among other teams
+    const otherBids = this.teams.filter(t => t.teamId !== teamId).map(t => t.currentBid ?? 0);
+    const maxOtherBid = Math.max(0, ...otherBids.filter(b => b > 0));
+    return maxOtherBid + this.bidInterval;
   }
 
   onBidPlaced(amount: number, teamId: string) {
@@ -82,12 +106,10 @@ export class Landingpage {
       console.log(`Team ${teamId} placed bid: 0. Can lock: ${this.canLock()}`);
       return;
     }
-    // For non-zero bids, must be strictly greater than all previous non-zero bids
-    const otherBids = this.teams.filter(t => t.teamId !== teamId).map(t => t.currentBid ?? 0);
-    const maxOtherBid = Math.max(0, ...otherBids.filter(b => b > 0));
-    if (amount <= maxOtherBid) {
-      // Reject bid: do not update currentBid
-      this.showToaster(`Bid must be greater than ${maxOtherBid}`);
+    // For non-zero bids, must be at least (maxOtherBid + bidInterval)
+    const minBid = this.getMinimumBid(teamId);
+    if (amount < minBid) {
+      this.showToaster(`Bid must be at least ${minBid}`);
       return;
     }
     // Accept bid only if valid
@@ -171,9 +193,9 @@ export class Landingpage {
   isProcessingResult = false;
   results: Record<string, 'none' | 'correct' | 'wrong'> = {};
 
-  private _setResultState(teamId: string, state: 'correct' | 'wrong'){
+  private _setResultState(teamId: string, state: 'correct' | 'wrong') {
     this.results[teamId] = state;
-    setTimeout(()=>{
+    setTimeout(() => {
       this.results[teamId] = 'none';
     }, 3000);
   }
@@ -189,6 +211,36 @@ export class Landingpage {
   closeWinnerModal() {
     this.winnerModalOpen = false;
     this.winnerTeam = null;
+  }
+
+  // End Game confirmation modal state
+  endGameConfirmOpen = false;
+
+  openEndGameConfirm() {
+    this.endGameConfirmOpen = true;
+  }
+
+  cancelEndGame() {
+    this.endGameConfirmOpen = false;
+  }
+
+  confirmEndGame() {
+    const gameCode = localStorage.getItem('roomCode');
+    console.log('Deleting teams for gameCode:', gameCode);
+    if (gameCode) {
+      this.http.delete(`/api/Team/bycode/${gameCode}`).subscribe({
+        next: () => {
+          localStorage.removeItem('roomCode');
+          window.location.href = '/index';
+        },
+        error: () => {
+          this.showToaster('Failed to end game.');
+        }
+      });
+    } else {
+      window.location.href = '/index';
+    }
+    this.endGameConfirmOpen = false;
   }
 
 
