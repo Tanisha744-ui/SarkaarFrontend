@@ -52,7 +52,7 @@ button {
 	font-weight: 600;
 	padding: 10px 20px;
 	cursor: pointer;
-	box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+	/* box-shadow: 0 2px 8px rgba(0,0,0,0.18); */
 	transition: background 0.2s, box-shadow 0.2s;
 }
 button:disabled {
@@ -60,3 +60,10 @@ button:disabled {
 	color: #888;
 	cursor: not-allowed;
 }
+
+.mat-dialog-container.custom-dialog-container {
+  background: #1e1e2f !important;
+  color: white !important;
+  border-radius: 20px !important;
+}
+

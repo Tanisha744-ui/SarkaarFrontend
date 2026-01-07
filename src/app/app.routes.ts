@@ -10,6 +10,7 @@ import { Tambola } from './tambola/tambola';
 import { TeamSelection } from './team-selection/team-selection';
 import { SarkaarModeSelect } from './sarkaar-mode-select/sarkaar-mode-select';
 import { SarkaarRoom } from './sarkaar-room/sarkaar-room';
+import { TambolaOnlineComponent } from './tambola-online/tambola-online.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -23,5 +24,7 @@ export const routes: Routes = [
   { path: 'game', component: Landingpage },
   { path: 'imposter-game', component: ImposterGame },
   { path: 'tambola', component: Tambola },
-  { path: 'tambola-game', component: TambolaGame }
+  { path: 'tambola-game', component: TambolaGame },
+  { path: 'tambola-online-setup', component: TambolaOnlineComponent },
+  { path: 'tambola-online', component: TambolaOnlineComponent } 
 ];

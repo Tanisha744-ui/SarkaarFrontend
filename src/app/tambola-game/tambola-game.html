@@ -1,3 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambola Game</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="tambola-game.css">
+</head>
+<body>
 <div class="tambola-game-container">
   <h1>Tambola Game</h1>
   <div class="game-layout">
@@ -23,13 +33,13 @@
         <div class="game-control">
           <button *ngIf="!isGameStarted" (click)="startNewGame()" class="start-game">Start New Game</button>
           <button *ngIf="isGameStarted" (click)="restartGame()" class="restart-game">Restart Game</button>
-          <div *ngIf="showAutoCall" class="auto-call-toggle">
-            <label class="toggle-label">Auto Call</label>
+          <!-- <div *ngIf="showAutoCall" class="speaker-mode-toggle">
+            <label class="toggle-label" for="speaker-mode-toggle">Speaker Mode</label>
             <div class="toggle-switch">
-              <input id="auto-call-toggle" type="checkbox" [(ngModel)]="autoCallEnabled" (change)="toggleAutoCall()" />
+              <input id="speaker-mode-toggle" type="checkbox" [(ngModel)]="speakerModeEnabled" [checked]="speakerModeEnabled" (click)="toggleSpeakerMode()" />
               <span class="slider"></span>
             </div>
-          </div>
+          </div> -->
           <div *ngIf="showAutoCall">
             <button *ngIf="autoCallEnabled && !autoCallPaused" (click)="toggleAutoCall()" class="pause-button">
               <span>&#10074;&#10074;</span> Pause
@@ -43,7 +53,13 @@
       </div>
 
       <div class="current-number-card">
-        <h3>Current Number</h3>
+        <div class="current-number-header">
+          <h3>Current Number</h3>
+          <button class="speaker-icon-button speaker" *ngIf="announceNumbersEnabled" (click)="toggleSpeakerMode()">
+            <i *ngIf="speakerModeEnabled" class="fas fa-volume-up"></i>
+            <i *ngIf="!speakerModeEnabled" class="fas fa-volume-mute"></i>
+          </button>
+        </div>
         <div class="current-number" [ngClass]="{'active': randomNumbers.length > 0}">
           {{ currentNumber }}
         </div>
@@ -54,9 +70,20 @@
         <p>{{ randomNumbers.length }} / 90 numbers called</p>
         <div class="called-numbers-list">
           <span *ngIf="randomNumbers.length === 0" class="no-numbers">No numbers called yet.</span>
-          <span *ngFor="let number of randomNumbers" class="called-number">{{ number }}</span>
+          <span *ngFor="let number of randomNumbers.slice().reverse()" class="called-number">{{ number }}</span>
         </div>
       </div>
+
+      <!-- <div class="bonus-card">
+        <h3>Bonus Options</h3>
+        <div class="bonus-buttons">
+          <button class="bonus-button" (click)="onBonusOptionClick('firstLine')">First Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('secondLine')">Second Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('thirdLine')">Third Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('fullHouse')">Full House</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('corners')">Corners</button>
+        </div>
+      </div> -->
     </div>
   </div>
 
@@ -68,7 +95,19 @@
         </div>
       </div>
 </div>
+    <div class="bonus-card" *ngIf="isGameStarted">
+        <h3>Bonus Options</h3>
+        <div class="bonus-buttons">
+          <button class="bonus-button" (click)="onBonusOptionClick('firstLine')" [disabled]="disabledButtons['firstLine']">First Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('secondLine')" [disabled]="disabledButtons['secondLine']">Second Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('thirdLine')" [disabled]="disabledButtons['thirdLine']">Third Line</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('fullHouse')" [disabled]="disabledButtons['fullHouse']">Full House</button>
+          <button class="bonus-button" (click)="onBonusOptionClick('earlyFive')" [disabled]="disabledButtons['earlyFive']">Early Five</button>
+        </div>
+      </div>
 
 <style>
   /* Removed inline CSS, moved to tambola-game.css */
 </style>
+</body>
+</html>
