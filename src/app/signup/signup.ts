@@ -33,7 +33,7 @@ export class Signup {
       password: this.password,
       roleId: this.roleId
     };
-    this.http.post('https://gamebackend-i03z.onrender.com/signup', payload).subscribe({
+    this.http.post('https://gamebackendfinal.onrender.com/signup', payload).subscribe({
       next: (res: any) => {
         this.successMsg = 'Signup successful! Redirecting to login...';
         this.loading = false;

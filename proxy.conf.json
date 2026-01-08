@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "https://gamebackend-i03z.onrender.com",
+    "target": "https://gamebackendfinal.onrender.com",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

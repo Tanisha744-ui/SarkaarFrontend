@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://gamebackend-i03z.onrender.com';
+  private apiUrl = 'https://gamebackendfinal.onrender.com';
 
   constructor(private http: HttpClient) {}
 
