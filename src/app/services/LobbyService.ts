@@ -169,7 +169,7 @@ export class LobbyService {
 
   async cleanupGame(gameId: string) {
     // Adjust the URL as needed
-    await fetch(`https://gamebackendfinal.onrender.com/ImposterGame/cleanup`, {
+    await fetch(`https://triogamebackend.onrender.com/ImposterGame/cleanup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(gameId)

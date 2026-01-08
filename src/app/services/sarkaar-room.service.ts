@@ -25,7 +25,7 @@ export class SarkaarRoomService {
   constructor(private http: HttpClient) {
       // Store team in backend DB
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('https://gamebackendfinal.onrender.com/sarkaarRoomHub') // Adjusted to match backend port
+      .withUrl('https://triogamebackend.onrender.com/sarkaarRoomHub') // Adjusted to match backend port
       .withAutomaticReconnect()
       .build();
 

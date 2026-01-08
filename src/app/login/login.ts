@@ -29,7 +29,7 @@ export class Login {
       email: this.email,
       password: this.password
     };
-    this.http.post('https://gamebackendfinal.onrender.com/login', payload).subscribe({
+    this.http.post('https://triogamebackend.onrender.com/login', payload).subscribe({
       next: (res: any) => {
         if (res && res.token) {
           localStorage.setItem('authToken', res.token);
