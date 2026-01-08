@@ -29,3 +29,25 @@
   font-size: 1em;
   cursor: pointer;
 }
+
+/* Final fix for white corners in the dialog box */
+.dialog-box {
+  background: #1e1e2f;
+  color: white;
+  border-radius: 20px;
+  padding: 20px;
+  overflow: hidden; /* Prevent content from overflowing */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Add shadow for better appearance */
+  border: none; /* Remove any default border */
+}
+
+/* Ensure the dialog container does not show white edges */
+.mat-dialog-container {
+  background: #1e1e2f; /* Match the dialog box background */
+  border-radius: 20px; /* Match the dialog box border radius */
+  overflow: hidden; /* Prevent overflow */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Add shadow for consistency */
+  padding: 0; /* Ensure no extra padding */
+  margin: 0; /* Remove any default margin */
+  border: none; /* Remove any default border */
+}

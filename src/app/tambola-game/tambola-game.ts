@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-tambola-game',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule], // Ensure CommonModule and FormsModule are included
   templateUrl: './tambola-game.html',
   styleUrls: ['./tambola-game.css']
 })
@@ -23,11 +23,28 @@ export class TambolaGame implements OnDestroy, OnInit {
   autoCallPaused: boolean = true; // Track pause/resume state
   currentNumber: string = "Waiting to start..."; // Default message before the game starts
   isGameStarted: boolean = false; // Track whether the game has started
+  callingInterval: number = 3; // Default calling interval in seconds
+  speakerModeEnabled: boolean = true; // Default Speaker Mode to ON
+  announceNumbersEnabled: boolean = false; // Default Announce Numbers to OFF
+  isRestartPending: boolean = false; // Track if a restart is pending
+  disabledButtons: { [key: string]: boolean } = {
+    firstLine: false,
+    secondLine: false,
+    thirdLine: false,
+    fullHouse: false,
+    earlyFive: false,
+  };
 
   constructor(private route: ActivatedRoute, private router: Router) {
     this.route.queryParams.subscribe(params => {
       this.numPlayers = +params['players'] || 0;
       this.playerNames = Array.isArray(params['names']) ? params['names'] : (params['names'] ? [params['names']] : []);
+      this.callingInterval = +params['interval'] || this.callingInterval; // Use the interval from query params if provided
+      this.autoCallEnabled = params['autoCall'] === 'true'; // Respect the autoCall parameter
+      this.announceNumbersEnabled = params['announceNumbers'] === 'true'; // Initialize Announce Numbers
+
+      console.log('Query Params:', params); // Debugging log to verify query parameters
+
       if (this.numPlayers > 0) {
         this.generateTickets();
         this.assignTickets();
@@ -38,6 +55,16 @@ export class TambolaGame implements OnDestroy, OnInit {
   ngOnInit() {
     this.initializeGame();
     this.isNumberGenerationScreen = true; // Ensure the grid is always displayed
+
+    // Ensure Speaker Mode is OFF if Announce Numbers is disabled
+    if (!this.announceNumbersEnabled) {
+      this.speakerModeEnabled = false;
+    }
+
+    // Ensure Speaker Mode is ON by default and announce the current number
+    if (this.speakerModeEnabled) {
+      this.announceCurrentNumber();
+    }
   }
 
   initializeGame() {
@@ -82,6 +109,24 @@ export class TambolaGame implements OnDestroy, OnInit {
     this.isNumberGenerationScreen = true;
   }
 
+  toggleSpeakerMode() {
+    // Correctly toggle the state on each click
+    console.log('Before toggle:', this.speakerModeEnabled);
+    this.speakerModeEnabled = !this.speakerModeEnabled;
+    console.log('After toggle:', this.speakerModeEnabled);
+
+    if (this.speakerModeEnabled) {
+      this.announceCurrentNumber();
+    }
+  }
+
+  announceCurrentNumber() {
+    if (this.currentNumber !== "Waiting to start...") {
+      const utterance = new SpeechSynthesisUtterance(`${this.currentNumber}`);
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
   generateRandomNumber() {
     if (this.randomNumbers.length >= 90) {
       console.log('All numbers have been generated.');
@@ -96,6 +141,10 @@ export class TambolaGame implements OnDestroy, OnInit {
     this.randomNumbers.push(newNumber);
     this.currentNumber = newNumber.toString(); // Update the current number
     console.log('Generated number:', newNumber);
+
+    if (this.speakerModeEnabled) {
+      this.announceCurrentNumber();
+    }
   }
 
   checkWinner() {
@@ -111,27 +160,37 @@ export class TambolaGame implements OnDestroy, OnInit {
   }
 
   startNewGame() {
+    if (this.isRestartPending) {
+      this.isRestartPending = false; // Clear the restart flag
+      this.generateTickets(); // Regenerate tickets for players
+      this.assignTickets(); // Reassign tickets to players
+    }
+
     this.isGameStarted = true; // Mark the game as started
     this.showAutoCall = true;
-    this.autoCallEnabled = true; // Auto Call is ON by default
-    this.autoCallPaused = false; // Start Auto Call immediately
+
+    // Respect the autoCallEnabled value
+    if (this.autoCallEnabled) {
+      this.autoCallPaused = false; // Start Auto Call immediately
+      this.startAutoCall(this.callingInterval * 1000); // Use the selected interval
+    } else {
+      this.autoCallPaused = true; // Ensure Auto Call remains paused
+    }
+
     this.randomNumbers = []; // Reset called numbers
     this.currentNumber = "Waiting to start..."; // Reset the current number
     this.isNumberGenerationScreen = true; // Show the number grid
-    this.startAutoCall(); // Begin Auto Call
   }
 
   restartGame() {
+    this.isRestartPending = true; // Mark restart as pending
     this.stopAutoCall(); // Stop any ongoing Auto Call
     this.isGameStarted = false; // Reset the game state
     this.showAutoCall = false;
-    this.autoCallEnabled = false; // Auto Call is OFF by default
     this.autoCallPaused = true; // Pause Auto Call
     this.randomNumbers = []; // Reset called numbers
     this.currentNumber = "Waiting to start..."; // Reset the current number
     this.isNumberGenerationScreen = false; // Hide the number grid
-    this.generateTickets(); // Regenerate tickets for players
-    this.assignTickets(); // Reassign tickets to players
   }
 
   toggleAutoCall() {
@@ -142,18 +201,18 @@ export class TambolaGame implements OnDestroy, OnInit {
     } else {
       this.autoCallPaused = !this.autoCallPaused;
       if (!this.autoCallPaused) {
-        this.startAutoCall();
+        this.startAutoCall(this.callingInterval * 1000); // Resume with the selected interval
       } else {
         this.stopAutoCall();
       }
     }
   }
 
-  startAutoCall() {
+  startAutoCall(interval: number = this.callingInterval * 1000) {
     this.stopAutoCall(); // Ensure no duplicate intervals
     this.autoCallInterval = setInterval(() => {
       this.generateRandomNumber();
-    }, 3000); // Call every 3 seconds
+    }, interval); // Call with the specified interval
   }
 
   stopAutoCall() {
@@ -169,6 +228,30 @@ export class TambolaGame implements OnDestroy, OnInit {
   }
 
   navigateToOffline() {
-    this.router.navigate(['/tambola-game']);
+    this.router.navigate(['/tambola-game'], {
+      queryParams: {
+        players: this.numPlayers,
+        names: this.playerNames,
+        interval: this.callingInterval,
+        autoCall: this.autoCallEnabled,
+        announceNumbers: this.announceNumbersEnabled // Include Announce Numbers in URL
+      }
+    }).then(() => {
+      console.log('Navigation successful with queryParams:', {
+        players: this.numPlayers,
+        names: this.playerNames,
+        interval: this.callingInterval,
+        autoCall: this.autoCallEnabled,
+        announceNumbers: this.announceNumbersEnabled
+      });
+    }).catch(err => {
+      console.error('Navigation error:', err);
+    });
+  }
+
+  onBonusOptionClick(option: string) {
+    console.log(`Bonus option selected: ${option}`);
+    this.disabledButtons[option] = true; // Disable the clicked button
+    // Add additional logic for handling the bonus option
   }
 }

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ImposterOffline } from './imposter-offline';
+import { TambolaOnline } from './tambola-online';
 
-describe('ImposterOffline', () => {
-  let component: ImposterOffline;
-  let fixture: ComponentFixture<ImposterOffline>;
+describe('TambolaOnline', () => {
+  let component: TambolaOnline;
+  let fixture: ComponentFixture<TambolaOnline>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ImposterOffline]
+      imports: [TambolaOnline]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ImposterOffline);
+    fixture = TestBed.createComponent(TambolaOnline);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

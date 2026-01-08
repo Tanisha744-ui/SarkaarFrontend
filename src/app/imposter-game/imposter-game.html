@@ -1,168 +1,256 @@
-<div class="game-wrapper">
+<div class="game-container">
+  <div class="imposter-container">
 
-  <!-- ================= STEP 0 : PLAYER COUNT ================= -->
-  <div class="card" *ngIf="step === 0">
-    <h1>🕵️ Imposter Game</h1>
-    <p class="subtitle">How many players are joining?</p>
-
-    <input type="number" [(ngModel)]="playerCount" min="3" />
-    <button class="primary" (click)="setPlayerCount()">Continue</button>
-  </div>
-
-  <!-- ================= STEP 1 : PLAYER NAMES ================= -->
-  <div class="card" *ngIf="step === 1">
-    <h2>Add Player {{ currentPlayerIndex + 1 }}</h2>
-
-    <input [(ngModel)]="tempName" placeholder="Enter player name" />
-    <button class="primary" (click)="addPlayerName()">Add Player</button>
-
-    <div class="players-list" *ngIf="playerNames.length">
-      <h4>Players</h4>
-      <span class="player-pill" *ngFor="let n of playerNames">{{ n }}</span>
-    </div>
-
-    <button class="success" *ngIf="currentPlayerIndex >= playerCount" (click)="createGame()">
-      Create Game
+    <!-- Return to Home Page button (top right, only on home page) -->
+    <button
+      *ngIf="step === 'home'"
+      class="return-home-btn"
+      style="position: absolute; top: 24px; right: 32px; z-index: 10;"
+      (click)="goToIndex()"
+    >
+      Back to Main Portal
     </button>
-  </div>
 
-  <!-- ================= STEP 3 : WAITING ROOM ================= -->
-  <div class="card" *ngIf="step === 3">
-    <h2>🎮 Waiting Room</h2>
-    <p>Let's Start</p>
-    <button class="primary" (click)="startGame()">Start Game</button>
-  </div>
-
-  <!-- ================= PASS DEVICE (CLUE + VOTE) ================= -->
-  <!-- ❌ WILL NOT SHOW ON RESULT STEP -->
-  <div class="card warning" *ngIf="showPassScreen && step !== 7">
-
-    <h2>📲 Pass the Device</h2>
-    <p>Hand over to</p>
-    <h3>
-      {{ step === 4.5
-      ? players[nextPlayerIndex]?.name
-      : players[voteTurnIndex]?.name }}
-    </h3>
-
-    <button class="primary" (click)="step === 4.5 ? proceedToNextClue() : proceedToNextVote()">
-      I'm
-      {{ step === 4.5
-      ? players[nextPlayerIndex]?.name
-      : players[voteTurnIndex]?.name }}
-    </button>
-  </div>
-
-  <!-- ================= STEP 4 : CLUE PHASE ================= -->
-  <div class="card" *ngIf="step === 4 && !showPassScreen">
-    <h2>🧠 Clue Phase</h2>
-
-    <!-- CURRENT PLAYER -->
-    <div *ngIf="isMyClueTurn()">
-      <p class="highlight">Your Word</p>
-      <h3>{{ word }}</h3>
-
-      <p class="imposter" *ngIf="isImposter">
-        😈 You are the IMPOSTER
-      </p>
-
-      <input [(ngModel)]="myClue" placeholder="Enter your clue..." />
-      <button class="primary" (click)="submitClue()">Submit Clue</button>
-    </div>
-
-    <!-- WAITING -->
-    <div *ngIf="!isMyClueTurn()">
-      <p>Waiting for</p>
-      <h3>{{ players[clueTurnIndex]?.name }}</h3>
-
-      <button class="secondary" (click)="switchToCurrentTurnPlayer()">
-        I'm {{ players[clueTurnIndex]?.name }}
+    <!-- HOME -->
+    <div class="card" *ngIf="step === 'home'">
+      <h2 class="neon-title">Imposter Game</h2>
+      <p class="subtle-text">Create or join a lobby to start playing</p>
+      <button class="action-btn create-btn" (click)="goCreate()">
+        Host a Secret Game Room
+      </button>
+      <button class="action-btn join-btn" (click)="goJoin()">
+        Enter a Mystery Room
+      </button>
+      <button class="action-btn viewer-btn" (click)="goViewer()">
+        Watch Game Live
       </button>
     </div>
-  </div>
 
-  <!-- ================= STEP 5 : ALL CLUES ================= -->
-  <div class="card" *ngIf="step === 5">
-    <h2>📝 All Clues</h2>
+    <!-- VIEWER JOIN -->
+    <div class="card" *ngIf="step === 'viewer-join'">
+      <h2>Watch Game Live</h2>
+      <input placeholder="Lobby Code" [(ngModel)]="viewerLobbyCode">
+      <button class="primary" (click)="joinAsViewer()">Join as Viewer</button>
+    </div>
 
-    <div class="clue-list">
-      <div class="clue-item" *ngFor="let p of players">
-        <span class="clue-name">{{ p.name }}</span>
-        <span class="clue-separator">:</span>
-        <span class="clue-text">{{ p.clue }}</span>
+    <!-- CREATE -->
+    <div class="card" *ngIf="step === 'create'">
+      <h2 style="text-align: center;">Host a Secret Game Room</h2>
+      <input placeholder="Enter Your Name" [(ngModel)]="playerName">
+      <input type="number" min="3" placeholder="Number of Detectives" [(ngModel)]="maxPlayers">
+      <button class="primary" (click)="createLobby()">Start as Host</button>
+    </div>
+
+    <!-- JOIN -->
+    <div class="card" *ngIf="step === 'join'">
+      <h2>Enter a Mystery Room</h2>
+      <input placeholder="Enter Your Name" [(ngModel)]="playerName">
+      <input placeholder="Room Code" [(ngModel)]="lobbyCode">
+      <button class="primary" (click)="joinLobby()">Join the Hunt</button>
+    </div>
+
+    <!-- LOBBY -->
+    <div class="card lobby-card" *ngIf="step === 'lobby'">
+      <h2 class="lobby-title">Lobby Code</h2>
+      <div class="code-box">
+        <span class="code-text">{{ lobbyCode }}</span>
+        <button class="copy-btn" (click)="copyCode()">
+          📋 Copy
+        </button>
+      </div>
+      <p class="lobby-subtext">
+        Share this code with your friends to join
+      </p>
+      <p class="waiting-text">
+        Waiting for players to join…
+      </p>
+    </div>
+
+    <!-- WORD -->
+    <div class="card word-phase-card" [ngClass]="{'word-showing': showWord || seeWordAgainVisible}"
+      *ngIf="step === 'word'">
+      <div class="word-container">
+        <div *ngIf="showWord || seeWordAgainVisible">
+          <div class="secret-word small-word-box">
+            {{ word }}
+          </div>
+          <div class="timer-text" *ngIf="showWord">Visible for {{ wordTimer }}s</div>
+          <div *ngIf="isImposter" class="imposter-alert">
+            You are the Imposter!
+          </div>
+          <button class="secondary" *ngIf="seeWordAgainVisible" (click)="seeWordAgainVisible = false"
+            style="margin-top: 24px;">
+            Hide Word
+          </button>
+        </div>
+        <div *ngIf="!showWord && !seeWordAgainVisible">
+          <div class="secret-word hidden">
+            🔒 Word Locked 🔒
+          </div>
+          <div class="subtle-text">Wait for admin to choose mode...</div>
+          <button class="primary" (click)="seeWordAgain()" style="margin-top: 24px;">
+            See Word Again
+          </button>
+          <div *ngIf="isHost" class="admin-choice" style="margin-top:18px;">
+            <button class="primary" (click)="chooseMode('online')">Play Online</button>
+            <button class="secondary" (click)="chooseMode('offline')">Play Offline</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE (HOST ONLY) -->
+    <div class="card" *ngIf="step === 'mode'">
+      <h2 class="neon-title">Choose Game Mode</h2>
+      <p class="subtle-text">Select how you want to play</p>
+      <button class="primary" (click)="chooseMode('online')">
+        🌐 Online (Chat + Clues)
+      </button>
+      <button class="secondary" (click)="chooseMode('offline')">
+        🎲 Offline (Reveal Imposter)
+      </button>
+    </div>
+
+    <!-- OFFLINE -->
+    <div class="card imposter-reveal-card" *ngIf="step === 'offline'">
+      <h2 style="text-align:center;">Offline Mode</h2>
+      <div *ngIf="imposterName">
+        <div class="imposter-result reveal-center">
+          <div class="imposter-reveal-label">The Imposter is</div>
+          <div class="imposter-name reveal-name">{{ imposterName }}</div>
+        </div>
+      </div>
+      <!-- ADMIN CONTROLS -->
+      <div class="admin-panel" *ngIf="isAdmin">
+        <button class="reveal-btn" *ngIf="!imposterRevealed" (click)="revealImposter()">
+          🔍 Reveal Imposter
+        </button>
+      </div>
+    </div>
+
+    <!-- CLUE ENTRY -->
+    <div class="card" *ngIf="step === 'clue-entry'">
+      <h2>Enter Your Clue</h2>
+      <input [(ngModel)]="myClue" placeholder="Type your clue..." [disabled]="clueSubmitted" />
+      <button class="primary" (click)="submitClue()" [disabled]="clueSubmitted || !myClue.trim()">
+        {{ clueSubmitted ? 'Waiting for others...' : 'Submit' }}
+      </button>
+      <div class="subtle-text" *ngIf="clueSubmitted || waitingMessage">{{ waitingMessage || 'Waiting for others...' }}
+      </div>
+    </div>
+
+    <!-- CLUE REVIEW -->
+    <div class="card" *ngIf="step === 'clue-review'">
+      <h2>All Clues (Round {{ round }})</h2>
+      <ul>
+        <li *ngFor="let player of players">
+          <span class="highlight">{{ player }} : </span>
+          <span>{{ clues[player] }}</span>
+        </li>
+      </ul>
+      <div class="proceed-controls">
+        <button class="primary" *ngIf="round < 3" (click)="proceedOrNextRound('next')">
+          Play Next Round
+        </button>
+        <button class="secondary" (click)="proceedOrNextRound('vote')">
+          Proceed to Voting
+        </button>
+      </div>
+      <div *ngIf="proceedToVotingClicked && waitingMessage && step === 'clue-review'" class="subtle-text">
+        {{ waitingMessage }}
+      </div>
+    </div>
+
+    <!-- VOTING -->
+    <div class="card" *ngIf="step === 'voting'">
+      <h2>Vote for the Imposter</h2>
+      <div class="vote-card-list">
+        <ng-container *ngFor="let player of players">
+          <button class="vote-btn" *ngIf="player !== playerName" [disabled]="votedFor" (click)="voteFor(player)">
+            {{ player }}
+          </button>
+        </ng-container>
+      </div>
+      <div *ngIf="votedFor || waitingMessage" class="subtle-text">{{ waitingMessage || 'Waiting for others to vote...'
+        }}</div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="card" *ngIf="step === 'result' && votingResult">
+      <h2>Voting Result</h2>
+      <div *ngIf="votingResult.imposterCaught" class="success-text">
+        The imposter <b>{{ votingResult.imposter }}</b> was caught!
+      </div>
+      <div *ngIf="!votingResult.imposterCaught" class="danger-text">
+        The imposter <b>{{ votingResult.imposter }}</b> escaped!<br>
+        <span *ngIf="votingResult.accused !== votingResult.imposter">
+          The group accused <b>{{ votingResult.accused }}</b>.
+        </span>
+      </div>
+      <!-- END GAME BUTTON (FOR ALL STEPS) -->
+      <div class="end-game-btn-container" style="margin-top: 24px;">
+        <button class="end-game-btn" (click)="endGameForPlayers()">Return to Home</button>
+      </div>
+    </div>
+
+    <!-- VIEWER MODE -->
+    <div *ngIf="step === 'viewer' && viewerData" style="position:relative;">
+      <!-- Top right Return Home button for viewers -->
+      <button
+        class="return-home-btn"
+        style="position: fixed; top: 2vh; right: 1vw; z-index: 10;"
+        (click)="goToIndex()"
+      >
+        Return to Home
+      </button>
+
+      <!-- Player cards: always visible -->
+      <div class="viewer-player-cards-row">
+        <div class="card viewer-player-card" *ngFor="let player of viewerData?.players">
+          <h3>
+            {{ player.Name }}
+            <span *ngIf="player.IsImposter" class="imposter-label">(Imposter)</span>
+          </h3>
+          <div><b>Word:</b> {{ player.Word }}</div>
+          <div *ngFor="let round of viewerData?.rounds">
+            <b>Round {{ round.round }} Clue : </b>
+            <span>{{ getClueTextForViewer(round, player) }}</span>
+          </div>
+
+          <div class="viewer-vote">
+            Voted for: {{ getVoteForViewer(player) }}
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!viewerData || !viewerData.players || viewerData.players.length === 0"
+        style="color:red; text-align:center; margin-top:16px;">
+        No player data available for viewer. Please check if the game has started and players have joined.
       </div>
 
-    </div>
-
-    <button class="primary" (click)="proceedToVotingPhase()">
-      Proceed to Voting
-    </button>
-  </div>
-
-  <!-- ================= STEP 6 : VOTING ================= -->
-  <div class="card" *ngIf="step === 6 && !votePhaseComplete">
-    <h2>🗳️ Voting Time</h2>
-    <p>Select who you think is the Imposter</p>
-
-    <!-- ===== CURRENT VOTER ===== -->
-    <div *ngIf="players[voteTurnIndex]?.playerId === playerId">
-
-      <button *ngFor="let p of players" class="vote-btn" [class.self-vote]="p.playerId === playerId"
-        [disabled]="p.playerId === playerId" (click)="vote(p.playerId)">
-
-        <span *ngIf="p.playerId !== playerId">
-          Vote {{ p.name }}
-        </span>
-
-        <span *ngIf="p.playerId === playerId">
-          {{ p.name }} (You)
-        </span>
-
-      </button>
-
-    </div>
-
-    <!-- ===== WAITING ===== -->
-    <div *ngIf="players[voteTurnIndex]?.playerId !== playerId">
-      <p>Waiting for</p>
-      <h3>{{ players[voteTurnIndex]?.name }}</h3>
-
-      <button class="secondary" (click)="switchToVoteTurnPlayer()">
-        I'm {{ players[voteTurnIndex]?.name }}
-      </button>
+      <!-- Result modal: overlays on top when result is present -->
+      <div *ngIf="viewerData.result" class="viewer-result-modal">
+        <div class="card result-card">
+          <h2 style="font-size:2.2em; margin-bottom:18px;">Game Result</h2>
+          <div style="margin-bottom:28px;">
+            <span *ngIf="viewerData.result.imposterCaught">
+              <span style="font-size:2em;">🎉</span><br>
+              <b style="font-size:1.3em;">The imposter <span class="imposter-name">{{ viewerData.result.imposter }}</span> was caught!</b><br>
+              <span style="color:green; font-weight:bold; font-size:1.1em;">Winner: Detectives</span>
+            </span>
+            <span *ngIf="!viewerData.result.imposterCaught">
+              <span style="font-size:2em;">😈</span><br>
+              <b style="font-size:1.3em;">The imposter <span class="imposter-name">{{ viewerData.result.imposter }}</span> escaped!</b><br>
+                <!-- <span style="color:crimson; font-weight:bold; font-size:1.1em;">
+                Winner: <span class="imposter-name">{{ viewerData.result.imposterName || viewerData.result.imposter }}</span> (Imposter)
+                </span> -->
+              <span *ngIf="viewerData.result.accused !== viewerData.result.imposter">
+                <br>(Group accused <b>{{ viewerData.result.accused }}</b>)
+              </span>
+            </span>
+          </div>
+          <button class="return-home-btn" (click)="goToIndex()" style="margin-top:12px;">Return Home</button>
+        </div>
+      </div>
     </div>
   </div>
-
-
-  <!-- ================= STEP 7 : RESULT ================= -->
-  <div class="card result" *ngIf="step === 7">
-    <h2>🏆 Game Result</h2>
-
-    <p>
-      Imposter:
-      <span class="imposter-name">{{ getImposterName() }}</span>
-    </p>
-
-    <h3 *ngIf="result?.imposterCaught" class="success-text">
-      🎉 Imposter Caught!
-    </h3>
-
-    <h3 *ngIf="!result?.imposterCaught" class="danger-text">
-      😈 Imposter Escaped!
-    </h3>
-  </div>
-
-  <div *ngIf="showPassCard" class="pass-device-overlay">
-    <div class="pass-card">
-      <h2>Pass the device to:</h2>
-      <p>
-        <strong>
-          {{ phase === 'clue' ? 'Player ' + (currentTurn + 1) + ' for clue' : 
-             phase === 'vote' ? 'Player ' + (currentTurn + 1) + ' for voting' : '' }}
-        </strong>
-      </p>
-      <button class="primary" (click)="confirmPass()">I'm Ready</button>
-    </div>
-  </div>
-
 </div>
