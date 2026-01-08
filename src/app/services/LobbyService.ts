@@ -24,7 +24,7 @@ export class LobbyService {
 
   constructor() {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('https://gamebackend-i03z.onrender.com/lobbyHub') // Capital H
+      .withUrl('https://triogamebackend.onrender.com/lobbyHub') // Capital H
       .withAutomaticReconnect()
       .build();
 
