@@ -24,7 +24,7 @@ export class LobbyService {
 
   constructor() {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5046/lobbyHub') // Capital H
+      .withUrl('https://gamebackend-i03z.onrender.com/lobbyHub') // Capital H
       .withAutomaticReconnect()
       .build();
 
@@ -169,7 +169,7 @@ export class LobbyService {
 
   async cleanupGame(gameId: string) {
     // Adjust the URL as needed
-    await fetch(`http://localhost:5046/ImposterGame/cleanup`, {
+    await fetch(`https://gamebackend-i03z.onrender.com/ImposterGame/cleanup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(gameId)

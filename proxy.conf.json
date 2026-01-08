@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "http://localhost:5046",
+    "target": "https://gamebackend-i03z.onrender.com",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
