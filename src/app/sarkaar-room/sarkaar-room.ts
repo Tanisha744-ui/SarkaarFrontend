@@ -69,6 +69,7 @@ export class SarkaarRoom implements OnDestroy {
     }
     try {
       // Only pass teamName for now, as service expects one argument
+      console.log('Creating room with team name:', this.teamName);
       const result = await this.roomService.createRoomWithTeamCode(this.teamName);
       this.code = result.roomCode;
       this.teamCode = result.teamCode;
