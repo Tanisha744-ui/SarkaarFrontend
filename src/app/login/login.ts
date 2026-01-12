@@ -32,7 +32,8 @@ export class Login {
     this.http.post('https://triogamebackend.onrender.com/login', payload).subscribe({
       next: (res: any) => {
         if (res && res.token) {
-          localStorage.setItem('authToken', res.token);
+          // Store token as 'userToken' for AuthGuard compatibility
+          localStorage.setItem('userToken', res.token);
         }
         if (res && res.username && res.roleid) {
           localStorage.setItem('username', res.username);

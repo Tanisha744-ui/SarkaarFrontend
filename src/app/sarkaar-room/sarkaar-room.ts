@@ -14,7 +14,7 @@ import { HttpClient } from '@angular/common/http';
 })
 
 export class SarkaarRoom implements OnDestroy {
-    private gameStartedSub: any;
+  private gameStartedSub: any;
   mode: 'none' | 'create' | 'join' | 'joinTeam' = 'none';
   teamName = '';
   code = '';
@@ -30,7 +30,7 @@ export class SarkaarRoom implements OnDestroy {
   maxBidAmount: number = 100;
   bidInterval: number = 10;
 
-  constructor(private roomService: SarkaarRoomService, private router: Router) {
+  constructor(private roomService: SarkaarRoomService, private router: Router, private http: HttpClient) {
     this.roomService.teams$.subscribe(teams => this.teams = teams);
     this.roomService.connectionState$.subscribe(state => this.connectionState = state);
     this.roomService.lastError$.subscribe(err => this.lastError = err);
@@ -39,7 +39,7 @@ export class SarkaarRoom implements OnDestroy {
     if (this.roomService.gameStarted$) {
       this.gameStartedSub = this.roomService.gameStarted$.subscribe(started => {
         if (started && this.joined && !this.isLead) {
-          this.router.navigate(['/game']);
+          this.router.navigate(['/sarkaar-online']);
         }
       });
     }
@@ -75,8 +75,8 @@ export class SarkaarRoom implements OnDestroy {
       this.teamCode = result.teamCode;
       // Store in backend DB
       await this.roomService.storeTeam(this.teamName, this.code).toPromise();
-      // Store controls in backend DB
-      await this.roomService.storeGameControls(this.code, this.bidInterval, this.maxBidAmount).toPromise();
+      // Store controls in backend DB (old service call removed)
+      await this.storeGameControlsApi(this.code, this.bidInterval, this.maxBidAmount);
       // Store room code for later use (for end game)
       localStorage.setItem('roomCode', this.code);
       this.joined = true;
@@ -122,7 +122,22 @@ export class SarkaarRoom implements OnDestroy {
     await this.roomService.notifyGameStarted(this.code);
     // Save the real-time teams to localStorage for the game page
     localStorage.setItem('teamNames', JSON.stringify(this.teams));
-    this.router.navigate(['/game']);
+    this.router.navigate(['/sarkaar-online']);
+  }
+  /**
+   * Store game controls in backend using GameControls API
+   */
+  async storeGameControlsApi(gameCode: string, interval: number, maxBidAmount: number) {
+    const controls = {
+      gameCode,
+      interval,
+      maxBidAmount
+    };
+    try {
+      await this.http.post('/api/GameControls', controls).toPromise();
+    } catch (err) {
+      console.error('Failed to store game controls:', err);
+    }
   }
 
   async joinTeam() {
@@ -137,7 +152,7 @@ export class SarkaarRoom implements OnDestroy {
         this.joined = true;
         this.isLead = false;
         // Redirect to game page immediately
-        this.router.navigate(['/game']);
+        this.router.navigate(['/sarkaar-online']);
       } else {
         alert('Invalid team code or team full');
       }

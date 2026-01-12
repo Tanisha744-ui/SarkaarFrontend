@@ -47,6 +47,18 @@
         <button class="close-winner" (click)="closeWinnerModal()">Close</button>
       </div>
     </div>
-    <!-- Online-specific End Game button and modal removed for offline version -->
+    <button *ngIf="isOnline && hasPlayedAtLeastOneRound" (click)="openEndGameConfirm()"
+      style="margin-top: 20px; background: #e74c3c; color: white;">End Game</button>
+
+    <div class="endgame-modal" *ngIf="endGameConfirmOpen">
+      <div class="endgame-content animate-winner">
+        <h2>End Game?</h2>
+        <p>Are you sure you want to end the game? This action cannot be undone.</p>
+        <div style="display: flex; gap: 16px; justify-content: center; margin-top: 20px;">
+          <button (click)="confirmEndGame()" style="background: #e74c3c; color: white;">End Game</button>
+          <button (click)="cancelEndGame()" style="background: #bdc3c7; color: #222;">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
