@@ -79,6 +79,7 @@ export class ImposterGame implements OnInit, OnDestroy, AfterViewChecked {
   } | null = null; // Holds all info for the viewer
   currentPlayerId: string = ''; // Add currentPlayerId to state
   viewerState: any = null; // <-- Add this
+  viewerClues: { [player: string]: string } = {}; // <-- Add this property
 
   allVotesIn: boolean = false;
   winningPlayer: any = null; // Replace 'any' with your actual player type if you have one
@@ -246,6 +247,11 @@ export class ImposterGame implements OnInit, OnDestroy, AfterViewChecked {
       this.step = 'viewer';
     });
 
+    this.lobbyService.onViewerClueUpdate((data) => {
+      // Update the viewer's clue list in real time
+      // For example, push to an array or update the UI
+      this.viewerClues[data.player] = data.clue;
+    });
   }
 
   ngOnDestroy(): void {
@@ -531,7 +537,7 @@ export class ImposterGame implements OnInit, OnDestroy, AfterViewChecked {
   }
   endGameForPlayers() {
     if (this.lobbyCode) {
-      this.http.post('/api/ImposterGame/cleanup', JSON.stringify(this.lobbyCode), {
+      this.http.post('https://triogamebackend.onrender.com/api/ImposterGame/cleanup', JSON.stringify(this.lobbyCode), {
         headers: { 'Content-Type': 'application/json' }
       }).subscribe({
         next: () => {

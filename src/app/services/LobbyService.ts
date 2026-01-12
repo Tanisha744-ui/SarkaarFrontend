@@ -24,7 +24,7 @@ export class LobbyService {
 
   constructor() {
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('https://triogamebackend.onrender.com/lobbyHub') // Capital H
+      .withUrl('https://triogamebackend.onrender.com/lobbyHub')
       .withAutomaticReconnect()
       .build();
 
@@ -191,5 +191,9 @@ export class LobbyService {
 
   onViewerUpdate(cb: (data: any) => void) {
     this.connection.on('ViewerUpdate', cb);
+  }
+
+  onViewerClueUpdate(cb: (data: { player: string, clue: string }) => void) {
+    this.connection.on('ViewerClueUpdate', cb);
   }
 }
