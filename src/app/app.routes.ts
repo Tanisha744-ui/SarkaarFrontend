@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
+import { SarkaarRoomGuard } from './guards/sarkaar-room.guard';
 import { Login } from './login/login';
 import { Signup } from './signup/signup';
 import { Landingpage } from './landingpage/landingpage';
@@ -11,20 +13,28 @@ import { TeamSelection } from './team-selection/team-selection';
 import { SarkaarModeSelect } from './sarkaar-mode-select/sarkaar-mode-select';
 import { SarkaarRoom } from './sarkaar-room/sarkaar-room';
 import { TambolaOnlineComponent } from './tambola-online/tambola-online.component';
+import { LandingpageOnlineComponent } from './landingpage-online/landingpage-online';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: Login },
   { path: 'signup', component: Signup },
-  { path: 'index', component: Index },
-  { path: 'dashboard', component: Dashboard },
-  { path: 'sarkaar-mode', component: SarkaarModeSelect },
-  { path: 'sarkaar-room', component: SarkaarRoom },
-  { path: 'team-selection', component: TeamSelection },
-  { path: 'game', component: Landingpage },
-  { path: 'imposter-game', component: ImposterGame },
-  { path: 'tambola', component: Tambola },
-  { path: 'tambola-game', component: TambolaGame },
-  { path: 'tambola-online-setup', component: TambolaOnlineComponent },
-  { path: 'tambola-online', component: TambolaOnlineComponent } 
+  {
+    path: '',
+    canActivate: [AuthGuard],
+    children: [
+      { path: 'index', component: Index },
+      { path: 'dashboard', component: Dashboard },
+      { path: 'sarkaar-mode', component: SarkaarModeSelect },
+      { path: 'sarkaar-room', component: SarkaarRoom },
+      { path: 'team-selection', component: TeamSelection },
+      { path: 'game', component: Landingpage },
+      { path: 'sarkaar-online', component: LandingpageOnlineComponent, canActivate: [SarkaarRoomGuard, AuthGuard] },
+      { path: 'imposter-game', component: ImposterGame },
+      { path: 'tambola', component: Tambola },
+      { path: 'tambola-game', component: TambolaGame },
+      { path: 'tambola-online-setup', component: TambolaOnlineComponent },
+      { path: 'tambola-online', component: TambolaOnlineComponent }
+    ]
+  }
 ];

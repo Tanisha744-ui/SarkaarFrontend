@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { NgFor, NgIf, NgClass } from '@angular/common';
 import { TeamCard } from '../team-card/team-card';
 import { Timer } from '../timer/timer';
-// ...existing code...
+import { HttpClient } from '@angular/common/http';
 
 interface TeamData {
   teamId: string;
@@ -12,13 +12,13 @@ interface TeamData {
 }
 
 @Component({
-  selector: 'app-landingpage',
+  selector: 'app-landingpage-online',
   imports: [TeamCard, NgFor, NgIf, NgClass, Timer],
-  templateUrl: './landingpage.html',
-  styleUrl: './landingpage.css',
+  templateUrl: './landingpage-online.html',
+  styleUrl: './landingpage-online.css',
   standalone: true
 })
-export class Landingpage {
+export class LandingpageOnlineComponent {
   // Toaster state
   toasterMessage: string | null = null;
   toasterTimeout: any = null;
@@ -31,9 +31,9 @@ export class Landingpage {
   winnerTeam: TeamData | null = null;
   hasPlayedAtLeastOneRound = false;
 
-  // ...existing code...
+  isOnline: boolean = false;
 
-  constructor() {
+  constructor(private http: HttpClient) {
     // Try to read team names from localStorage
     const storedNames = localStorage.getItem('teamNames');
     let names: string[] = [];
@@ -66,7 +66,8 @@ export class Landingpage {
         this.bidInterval = parsed;
       }
     }
-    // ...existing code...
+    // Detect online mode by checking if roomCode exists
+    this.isOnline = !!localStorage.getItem('roomCode');
   }
 
   isGameLocked: boolean = false;
@@ -212,7 +213,35 @@ export class Landingpage {
     this.winnerTeam = null;
   }
 
-  // ...existing code...
+  // End Game confirmation modal state
+  endGameConfirmOpen = false;
+
+  openEndGameConfirm() {
+    this.endGameConfirmOpen = true;
+  }
+
+  cancelEndGame() {
+    this.endGameConfirmOpen = false;
+  }
+
+  confirmEndGame() {
+    const gameCode = localStorage.getItem('roomCode');
+    console.log('Deleting teams for gameCode:', gameCode);
+    if (gameCode) {
+      this.http.delete(`/api/Team/bycode/${gameCode}`).subscribe({
+        next: () => {
+          localStorage.removeItem('roomCode');
+          window.location.href = '/index';
+        },
+        error: () => {
+          this.showToaster('Failed to end game.');
+        }
+      });
+    } else {
+      window.location.href = '/index';
+    }
+    this.endGameConfirmOpen = false;
+  }
 
 
 }

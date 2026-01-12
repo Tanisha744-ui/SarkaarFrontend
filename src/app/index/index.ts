@@ -18,6 +18,7 @@ export class Index implements OnInit {
 
   logout() {
     localStorage.removeItem('username');
+    localStorage.removeItem('userToken');
     window.location.href = '/login';
   }
 }
