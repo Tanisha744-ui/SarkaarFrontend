@@ -80,6 +80,9 @@ export class SarkaarRoomService {
   joinTeam(code: string, teamName: string): Promise<boolean> {
     return this.hubConnection.invoke('JoinTeam', code, teamName);
   }
+  getGameControls(gameCode: string) {
+    return this.http.get(`/api/GameControls/${gameCode}`);
+  }
 
   // Game started logic
   async setGameStarted(roomCode: string, started: boolean): Promise<void> {

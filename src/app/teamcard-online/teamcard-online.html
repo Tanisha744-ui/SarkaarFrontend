@@ -1,0 +1,48 @@
+<div class="team-card" [ngClass]="{
+    active: isActive,
+    correct: resultState === 'correct',
+    wrong: resultState === 'wrong'
+  }">
+  <div class="card-header">
+    <h2>{{ team.name }}</h2>
+  </div>
+
+  <div class="card-body">
+    <div class="balance-section">
+      <span class="balance-label">Balance</span>
+      <span class="balance-amount">{{ maxBidAmount || team.balance }}</span>
+    </div>
+
+    <div class="current-bid" *ngIf="team.currentBid !== undefined">
+      <span class="bid-label">Current Bid</span>
+      <span class="bid-amount">{{ team.currentBid }}</span>
+    </div>
+
+    <div class="bid-section">
+      <div class="bid-input-spinner-wrapper">
+        <input type="number" [(ngModel)]="currentBidAmount" [max]="maxBidAmount || team.balance" [min]="minimumBid" class="bid-input with-spinner"
+          [disabled]="isLocked" placeholder="Enter bid" />
+        <div class="custom-spinner-btns">
+          <button class="spinner-btn up" (click)="changeBid('up')" [disabled]="isLocked || (currentBidAmount ?? 0) >= (maxBidAmount || team.balance)">&#9650;</button>
+          <button class="spinner-btn down" (click)="changeBid('down')" [disabled]="isLocked || (currentBidAmount ?? 0) <= minimumBid">&#9660;</button>
+        </div>
+      </div>
+
+      <button class="bid-button" (click)="onBidSubmit(currentBidAmount ?? 0)"
+        [disabled]="isLocked">
+        Place Bid
+      </button>
+    </div>
+
+    <div class="answer-section" *ngIf="isLocked && isActive">
+      <p class="answer-label">Answer?</p>
+      <div class="answer-buttons">
+        <button class="tick" (click)="onAnswer(true)" [disabled]="!answerEnabled">✔</button>
+        <button class="cross" (click)="onAnswer(false)" [disabled]="!answerEnabled">✖</button>
+      </div>
+      <small *ngIf="!answerEnabled" class="hint-text">
+        Start the timer to enable answers
+      </small>
+    </div>
+  </div>
+</div>

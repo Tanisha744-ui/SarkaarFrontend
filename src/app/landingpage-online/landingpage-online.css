@@ -212,7 +212,7 @@
 
 
 /* Team card sizing */
-app-team-card {
+app-teamcard-online {
   width: 100%;
   max-width: 300px;
   /* min-width: 200px; */

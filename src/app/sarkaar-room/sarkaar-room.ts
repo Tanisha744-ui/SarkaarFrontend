@@ -14,6 +14,10 @@ import { HttpClient } from '@angular/common/http';
 })
 
 export class SarkaarRoom implements OnDestroy {
+      isProceeding: boolean = false;
+      proceedingMessage: string = '';
+    isLoading: boolean = false;
+    loadingMessage: string = '';
   private gameStartedSub: any;
   mode: 'none' | 'create' | 'join' | 'joinTeam' = 'none';
   teamName = '';
@@ -67,6 +71,8 @@ export class SarkaarRoom implements OnDestroy {
       alert('Not connected to server. Please wait or try again.');
       return;
     }
+    this.isLoading = true;
+    this.loadingMessage = 'Creating room...';
     try {
       // Only pass teamName for now, as service expects one argument
       console.log('Creating room with team name:', this.teamName);
@@ -83,6 +89,9 @@ export class SarkaarRoom implements OnDestroy {
       this.isLead = true;
     } catch (err: any) {
       alert('Failed to create room: ' + (err?.message || err));
+    } finally {
+      this.isLoading = false;
+      this.loadingMessage = '';
     }
   }
 
@@ -92,6 +101,8 @@ export class SarkaarRoom implements OnDestroy {
       alert('Not connected to server. Please wait or try again.');
       return;
     }
+    this.isLoading = true;
+    this.loadingMessage = 'Joining room...';
     try {
       const result = await this.roomService.joinRoomWithTeamCode(this.code, this.teamName) as { success: boolean; teamCode: string; error?: string };
       if (result.success) {
@@ -114,15 +125,25 @@ export class SarkaarRoom implements OnDestroy {
       }
     } catch (err: any) {
       alert('Failed to join room: ' + (err?.message || err));
+    } finally {
+      this.isLoading = false;
+      this.loadingMessage = '';
     }
   }
 
   async proceedToGame() {
+    this.isProceeding = true;
+    this.proceedingMessage = 'Starting game...';
     // Notify all clients in the room to start the game
     await this.roomService.notifyGameStarted(this.code);
     // Save the real-time teams to localStorage for the game page
     localStorage.setItem('teamNames', JSON.stringify(this.teams));
-    this.router.navigate(['/sarkaar-online']);
+    // Simulate a short delay for UX (optional, remove if not needed)
+    setTimeout(() => {
+      this.isProceeding = false;
+      this.proceedingMessage = '';
+      this.router.navigate(['/sarkaar-online']);
+    }, 800);
   }
   /**
    * Store game controls in backend using GameControls API

@@ -1,0 +1,253 @@
+/* Custom spinner buttons inside input */
+.bid-input-spinner-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.bid-input.with-spinner {
+  padding-right: 38px;
+}
+
+.custom-spinner-btns {
+  position: absolute;
+  right: 8px;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  height: 85%;
+}
+
+.spinner-btn {
+  width: 26px;
+  height: 15px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.2s;
+  line-height: 1;
+}
+.spinner-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* Hide browser default number input spinners */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Bid input group for custom step buttons */
+.bid-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.bid-step-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #0ea5e9;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.bid-step-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.answer-section .tick:disabled,
+.answer-section .cross:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+  box-shadow: none;
+}
+.team-card {
+  background: rgba(139, 152, 185, 0.15);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  padding: 20px;
+  width: 90%;
+  max-width: 300px;
+  color: #e5e7eb;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Active team highlight */
+.team-card.active {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow:
+    0 0 0 2px rgba(34, 211, 238, 0.8),
+    0 16px 40px rgba(0, 0, 0, 0.7);
+}
+
+/* Header */
+.card-header {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #22d3ee;
+}
+
+/* Balance / bid rows */
+.balance-section,
+.current-bid {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(138, 139, 147, 0.04);
+  margin-bottom: 10px;
+}
+
+.balance-label,
+.bid-label {
+  color: #f9fbfd;
+  font-size: 0.85rem;
+}
+
+.balance-amount {
+  color: #22c55e;
+  font-weight: 700;
+}
+
+.bid-amount {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+/* Bid section */
+.bid-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.bid-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #020617;
+  color: #f9fbfd;
+  text-align: center;
+  font-size: 1rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.bid-input:focus {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(34, 211, 238, 0.75),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.bid-button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  color: #020617;
+  background: linear-gradient(135deg, #22d3ee, #38bdf8);
+}
+
+.bid-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.error-text {
+  color: #ef4444;
+  font-size: 0.8rem;
+}
+
+/* Answer section */
+.answer-section {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.answer-label {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.answer-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.answer-section button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.answer-section .tick {
+  background: #22c55e;
+  color: #020617;
+}
+
+.answer-section .cross {
+  background: #ef4444;
+  color: #fff;
+}
+
+.hint-text {
+  color: #6b7280;
+  font-size: 0.8rem;
+  margin-top: 6px;
+}
+
+/* Result animations */
+.team-card.correct {
+  animation: correctFlash 3s ease-in-out;
+  box-shadow: 0 0 40px 12px rgba(34, 197, 94, 0.9);
+}
+
+.team-card.wrong {
+  animation: wrongFlash 3s ease-in-out;
+  box-shadow: 0 0 40px 12px rgba(239, 68, 68, 0.9);
+}
+
+@keyframes correctFlash {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wrongFlash {
+  0% { transform: scale(1); }
+  25% { transform: scale(0.97) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0); }
+}

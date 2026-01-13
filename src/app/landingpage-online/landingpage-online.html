@@ -1,3 +1,6 @@
+  <div *ngIf="isLoading" class="room-status room-loading">
+    <span>{{ loadingMessage }}</span>
+  </div>
 <div class="landing-container">
   <div *ngIf="toasterMessage" class="toaster-card">
     <span class="toaster-message">{{ toasterMessage }}</span>
@@ -15,17 +18,18 @@
 
   <div class="main-content-area">
     <div class="team-grid" [ngClass]="{'two-columns': teams.length === 2}">
-      <app-team-card *ngFor="let team of teams"
+      <app-teamcard-online *ngFor="let team of teams"
         [team]="team"
         [isLocked]="isGameLocked"
         [isActive]="activeTeam === team.teamId"
         [answerEnabled]="!!roundTimer?.running"
         [resultState]="results[team.teamId] || 'none'"
         [minimumBid]="getMinimumBid(team.teamId)"
-        [bidInterval]="bidInterval"
+        [bidInterval]="gameControls?.interval || bidInterval"
+        [maxBidAmount]="gameControls?.maxBidAmount"
         (bidChange)="onBidPlaced($event, team.teamId)"
         (answer)="handleAnswer($event, team.teamId)">
-      </app-team-card>
+      </app-teamcard-online>
     </div>
 
     <div class="lock-wrapper" *ngIf="!isGameLocked">

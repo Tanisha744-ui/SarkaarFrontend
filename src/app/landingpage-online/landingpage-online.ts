@@ -1,63 +1,56 @@
 import { Component, ViewChild } from '@angular/core';
 import { NgFor, NgIf, NgClass } from '@angular/common';
-import { TeamCard } from '../team-card/team-card';
+import { TeamcardOnline } from '../teamcard-online/teamcard-online';
 import { Timer } from '../timer/timer';
 import { HttpClient } from '@angular/common/http';
+import { SarkaarRoomService } from '../services/sarkaar-room.service';
+import { BidService, BidDto } from '../services/bid.service';
+import { BidSignalRService } from '../services/bid-signalr.service';
 
 interface TeamData {
   teamId: string;
   name: string;
   balance: number;
   currentBid?: number;
+  gameId?: number;
+  id?: number; // real DB team id
 }
 
 @Component({
   selector: 'app-landingpage-online',
-  imports: [TeamCard, NgFor, NgIf, NgClass, Timer],
+  imports: [TeamcardOnline, NgFor, NgIf, NgClass, Timer],
   templateUrl: './landingpage-online.html',
   styleUrl: './landingpage-online.css',
   standalone: true
 })
 export class LandingpageOnlineComponent {
+    isLoading: boolean = true;
+    loadingMessage: string = 'Loading...';
   // Toaster state
   toasterMessage: string | null = null;
   toasterTimeout: any = null;
   teams: TeamData[] = [];
-
-  // Bid interval (read from localStorage if set in team selection)
   bidInterval: number = 10;
-
   winnerModalOpen = false;
   winnerTeam: TeamData | null = null;
   hasPlayedAtLeastOneRound = false;
-
   isOnline: boolean = false;
+  gameControls: any = null;
+  isGameLocked: boolean = false;
+  activeTeam: string | null = null;
+  @ViewChild('roundTimer') roundTimer?: Timer;
+  isProcessingResult = false;
+  results: Record<string, 'none' | 'correct' | 'wrong'> = {};
+  endGameConfirmOpen = false;
 
-  constructor(private http: HttpClient) {
-    // Try to read team names from localStorage
-    const storedNames = localStorage.getItem('teamNames');
-    let names: string[] = [];
-    try {
-      if (storedNames) {
-        names = JSON.parse(storedNames);
-      }
-    } catch { }
-    // Use provided names, fallback to default
-    if (names.length >= 2 && names.length <= 10) {
-      this.teams = names.map((name, idx) => ({
-        teamId: String.fromCharCode(65 + idx),
-        name,
-        balance: 100000,
-        currentBid: undefined
-      }));
-    } else {
-      this.teams = [
-        { teamId: 'A', name: 'Team A', balance: 100000, currentBid: undefined },
-        { teamId: 'B', name: 'Team B', balance: 100000, currentBid: undefined },
-        { teamId: 'C', name: 'Team C', balance: 100000, currentBid: undefined },
-        { teamId: 'D', name: 'Team D', balance: 100000, currentBid: undefined }
-      ];
-    }
+  constructor(
+    private http: HttpClient,
+    private sarkaarRoomService: SarkaarRoomService,
+    private bidService: BidService,
+    private bidSignalR: BidSignalRService
+  ) { }
+
+  ngOnInit() {
     // Read bid interval (stepCount) from localStorage if set in team selection
     const storedStep = localStorage.getItem('stepCount');
     if (storedStep) {
@@ -68,54 +61,138 @@ export class LandingpageOnlineComponent {
     }
     // Detect online mode by checking if roomCode exists
     this.isOnline = !!localStorage.getItem('roomCode');
+
+    // Fetch teams and game controls from backend if online
+    if (this.isOnline) {
+      const gameCode = localStorage.getItem('roomCode');
+      if (gameCode) {
+        this.isLoading = true;
+        this.loadingMessage = 'Loading teams...';
+        // Fetch teams from backend and map to TeamData
+        this.http.get<any[]>(`/api/Team/bycode/${gameCode}`).subscribe({
+          next: (teams) => {
+            this.teams = teams.map((t, idx) => ({
+              teamId: String.fromCharCode(65 + idx),
+              name: t.name,
+              balance: 100000,
+              currentBid: undefined,
+              gameId: 0,
+              id: t.id
+            }));
+            if (teams.length > 0 && teams[0].gameId) {
+              this.bidSignalR.startConnection(teams[0].gameId);
+            }
+            this.initBidsAndSignalR();
+            this.isLoading = false;
+            this.loadingMessage = '';
+          },
+          error: () => {
+            // fallback to local
+            this.teams = [
+              { teamId: 'A', name: 'Team A', balance: 100000, currentBid: undefined, gameId: 0 },
+              { teamId: 'B', name: 'Team B', balance: 100000, currentBid: undefined, gameId: 0 },
+              { teamId: 'C', name: 'Team C', balance: 100000, currentBid: undefined, gameId: 0 },
+              { teamId: 'D', name: 'Team D', balance: 100000, currentBid: undefined, gameId: 0 }
+            ];
+            this.initBidsAndSignalR();
+            this.isLoading = false;
+            this.loadingMessage = '';
+          }
+        });
+        // Fetch game controls
+        this.sarkaarRoomService.getGameControls(gameCode).subscribe({
+          next: (controls) => {
+            this.gameControls = controls;
+          },
+          error: (err) => {
+            this.gameControls = null;
+          }
+        });
+      }
+    } else {
+      this.isLoading = false;
+      this.loadingMessage = '';
+    }
   }
 
-  isGameLocked: boolean = false;
-  activeTeam: string | null = null;
-  @ViewChild('roundTimer') roundTimer?: Timer;
+  private initBidsAndSignalR() {
+    this.fetchBidsFromBackend();
+    // On SignalR event, always fetch latest bids from backend
+    this.bidSignalR.bidReceived$.subscribe(({ gameId, teamId, amount }) => {
+      this.fetchBidsFromBackend();
+    });
+  }
 
-  // Checking whether all teams have placed a positive bid and
-  // the maximum bid is unique (occurs exactly once)
+  fetchBidsFromBackend() {
+    this.bidService.getBids().subscribe({
+      next: (bids: BidDto[]) => {
+        // Map backend bids to teams
+        for (const bid of bids) {
+          const team = this.teams.find(t => t.id === bid.teamId);
+          if (team) {
+            team.currentBid = bid.amount;
+            team.gameId = bid.gameId;
+          }
+        }
+        // const gameId = bids[0]?.gameId;
+        // if (gameId) {
+        //   this.bidSignalR.startConnection(gameId);
+        // }
+      }
+    });
+  }
+
   canLock(): boolean {
-    const bids = this.teams.map(t => t.currentBid);
+    const bids = this.teams.map((t: TeamData) => t.currentBid);
     // All teams must have entered a bid (including zero)
-    if (bids.some(b => b === undefined || b === null)) return false;
+    if (bids.some((b: number | undefined | null) => b === undefined || b === null)) return false;
     // Find all non-zero bids
-    const nonZeroBids = bids.filter(b => typeof b === 'number' && b > 0) as number[];
+    const nonZeroBids = bids.filter((b: number | undefined | null) => typeof b === 'number' && b > 0) as number[];
     if (nonZeroBids.length === 0) return false; // At least one non-zero bid required
     // The maximum non-zero bid must be unique
     const max = Math.max(...nonZeroBids);
-    const maxCount = nonZeroBids.filter(b => b === max).length;
+    const maxCount = nonZeroBids.filter((b: number) => b === max).length;
     return maxCount === 1;
   }
 
-  // Get the minimum allowed bid for a team (for increment button)
   getMinimumBid(teamId: string): number {
     // Find the current max non-zero bid among other teams
-    const otherBids = this.teams.filter(t => t.teamId !== teamId).map(t => t.currentBid ?? 0);
-    const maxOtherBid = Math.max(0, ...otherBids.filter(b => b > 0));
+    const otherBids = this.teams.filter((t: TeamData) => t.teamId !== teamId).map((t: TeamData) => t.currentBid ?? 0);
+    const maxOtherBid = Math.max(0, ...otherBids.filter((b: number) => b > 0));
     return maxOtherBid + this.bidInterval;
   }
 
   onBidPlaced(amount: number, teamId: string) {
-    const team = this.teams.find(t => t.teamId === teamId);
-    if (!team) return;
-    // Zero is always valid
-    if (amount === 0) {
-      team.currentBid = 0;
-      console.log(`Team ${teamId} placed bid: 0. Can lock: ${this.canLock()}`);
-      return;
-    }
-    // For non-zero bids, must be at least (maxOtherBid + bidInterval)
+  const team = this.teams.find(t => t.teamId === teamId);
+  if (!team || !team.id) return;
+
+  if (amount !== 0) {
     const minBid = this.getMinimumBid(teamId);
     if (amount < minBid) {
       this.showToaster(`Bid must be at least ${minBid}`);
       return;
     }
-    // Accept bid only if valid
-    team.currentBid = amount;
-    console.log(`Team ${teamId} placed bid: ${amount}. Can lock: ${this.canLock()}`);
   }
+
+  this.bidService.createBid({
+    teamId: team.id,
+    amount,
+    gameId: team.gameId ?? 0
+  }).subscribe({
+    error: err => console.error('Bid create error:', err),
+    next: () => {
+      // Broadcast bid via SignalR for real-time update
+      this.bidSignalR.sendBid({
+        gameId: team.gameId ?? 0,
+        teamId: team.id!,
+        amount
+      });
+      // After placing bid, fetch latest bids from backend
+      this.fetchBidsFromBackend();
+    }
+  });
+}
+
 
   showToaster(message: string) {
     this.toasterMessage = message;
@@ -162,7 +239,7 @@ export class LandingpageOnlineComponent {
 
   handleAnswer(correct: boolean, teamId: string) {
     if (this.isProcessingResult) return;
-    const team = this.teams.find(t => t.teamId === teamId);
+    const team = this.teams.find((t: TeamData) => t.teamId === teamId);
     if (!team) return;
     const bidAmount = team.currentBid || 0;
 
@@ -178,7 +255,7 @@ export class LandingpageOnlineComponent {
         team.balance -= bidAmount;
       }
 
-      this.teams.forEach(t => t.currentBid = 0);
+      this.teams.forEach((t: TeamData) => t.currentBid = 0);
       this.isGameLocked = false;
       this.activeTeam = null;
       if (this.roundTimer) {
@@ -190,9 +267,6 @@ export class LandingpageOnlineComponent {
     }, 3000);
   }
 
-  isProcessingResult = false;
-  results: Record<string, 'none' | 'correct' | 'wrong'> = {};
-
   private _setResultState(teamId: string, state: 'correct' | 'wrong') {
     this.results[teamId] = state;
     setTimeout(() => {
@@ -202,8 +276,8 @@ export class LandingpageOnlineComponent {
 
   showWinner() {
     // Find team with max balance (the actual winner of the game)
-    let maxBalance = Math.max(...this.teams.map(t => t.balance));
-    let winners = this.teams.filter(t => t.balance === maxBalance);
+    let maxBalance = Math.max(...this.teams.map((t: TeamData) => t.balance));
+    let winners = this.teams.filter((t: TeamData) => t.balance === maxBalance);
     this.winnerTeam = winners.length > 0 ? winners[0] : null;
     this.winnerModalOpen = true;
   }
@@ -212,9 +286,6 @@ export class LandingpageOnlineComponent {
     this.winnerModalOpen = false;
     this.winnerTeam = null;
   }
-
-  // End Game confirmation modal state
-  endGameConfirmOpen = false;
 
   openEndGameConfirm() {
     this.endGameConfirmOpen = true;
