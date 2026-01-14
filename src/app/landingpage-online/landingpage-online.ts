@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { SarkaarRoomService } from '../services/sarkaar-room.service';
 import { BidService, BidDto } from '../services/bid.service';
 import { BidSignalRService } from '../services/bid-signalr.service';
+import { API_BASE } from '../api.config';
 
 interface TeamData {
   teamId: string;
@@ -73,7 +74,7 @@ export class LandingpageOnlineComponent {
         this.isLoading = true;
         this.loadingMessage = 'Loading teams...';
         // Fetch teams from backend and map to TeamData
-        this.http.get<any[]>(`/api/Team/bycode/${gameCode}`).subscribe({
+        this.http.get<any[]>(`${API_BASE}/api/Team/bycode/${gameCode}`).subscribe({
           next: (teams) => {
             this.teams = teams.map((t, idx) => ({
               teamId: String.fromCharCode(65 + idx),
@@ -316,7 +317,7 @@ export class LandingpageOnlineComponent {
     const gameCode = localStorage.getItem('roomCode');
     console.log('Deleting teams for gameCode:', gameCode);
     if (gameCode) {
-      this.http.delete(`/api/Team/bycode/${gameCode}`).subscribe({
+      this.http.delete(`${API_BASE}/api/Team/bycode/${gameCode}`).subscribe({
         next: () => {
           localStorage.removeItem('roomCode');
           window.location.href = '/index';
