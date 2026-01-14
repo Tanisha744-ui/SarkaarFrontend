@@ -29,13 +29,15 @@ export class TeamcardOnline implements OnChanges {
   @Input() minimumBid: number = 0;
   @Input() bidInterval: number = 10;
   @Input() maxBidAmount?: number;
+  @Input() canBid: boolean = false;
 
   @Output() bidChange = new EventEmitter<number>();
   @Output() answer = new EventEmitter<boolean>();
 
   currentBidAmount: number | undefined;
   stepCount: number = 10; // fallback, but use bidInterval if provided
-  
+  isLoading: boolean = false; // New state for loader
+
   // Helper method to safely check if bid exceeds balance
   isBidExceedingBalance(): boolean {
     return this.currentBidAmount !== undefined && this.currentBidAmount > this.team.balance;
@@ -112,6 +114,10 @@ export class TeamcardOnline implements OnChanges {
     // Clamp to [minimumBid, balance]
     roundedAmount = Math.max(this.minimumBid, Math.min(roundedAmount, this.team.balance));
     this.currentBidAmount = roundedAmount;
+
+    // Show loader
+    this.isLoading = true;
+
     // Call backend to create bid
     const dto: CreateBidDto = {
       teamId: parseInt(this.team.teamId, 10) || 0,
@@ -120,9 +126,11 @@ export class TeamcardOnline implements OnChanges {
     };
     this.bidService.createBid(dto).subscribe({
       next: (bid) => {
+        this.isLoading = false; // Hide loader
         this.bidChange.emit(roundedAmount); // Notify parent
       },
       error: () => {
+        this.isLoading = false; // Hide loader
         // fallback: still emit, but could show error
         this.bidChange.emit(roundedAmount);
       }

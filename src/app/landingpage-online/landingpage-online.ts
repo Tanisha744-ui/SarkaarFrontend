@@ -42,6 +42,8 @@ export class LandingpageOnlineComponent {
   isProcessingResult = false;
   results: Record<string, 'none' | 'correct' | 'wrong'> = {};
   endGameConfirmOpen = false;
+  isHost=false;
+
 
   constructor(
     private http: HttpClient,
@@ -51,7 +53,9 @@ export class LandingpageOnlineComponent {
   ) { }
 
   ngOnInit() {
-    // Read bid interval (stepCount) from localStorage if set in team selection
+    this.isHost = localStorage.getItem('isHost') === 'true' 
+           || localStorage.getItem('isHost') === '1';
+
     const storedStep = localStorage.getItem('stepCount');
     if (storedStep) {
       const parsed = parseInt(storedStep, 10);
@@ -116,12 +120,30 @@ export class LandingpageOnlineComponent {
   }
 
   private initBidsAndSignalR() {
+  this.bidService.getBids().subscribe((bids: BidDto[]) => {
+
+    // Map bids to teams
+    for (const bid of bids) {
+      const team = this.teams.find(t => t.id === bid.teamId);
+      if (team) {
+        team.currentBid = bid.amount;
+        team.gameId = bid.gameId;
+      }
+    }
+
+    // 🔥 Start SignalR ONCE with real gameId
+    const gameId = bids[0]?.gameId;
+    if (gameId) {
+      this.bidSignalR.startConnection(gameId);
+    }
+  });
+
+  // Realtime updates
+  this.bidSignalR.bidReceived$.subscribe(() => {
     this.fetchBidsFromBackend();
-    // On SignalR event, always fetch latest bids from backend
-    this.bidSignalR.bidReceived$.subscribe(({ gameId, teamId, amount }) => {
-      this.fetchBidsFromBackend();
-    });
-  }
+  });
+}
+
 
   fetchBidsFromBackend() {
     this.bidService.getBids().subscribe({
@@ -141,6 +163,10 @@ export class LandingpageOnlineComponent {
       }
     });
   }
+  canEditTeam(team: TeamData): boolean {
+  const myTeamName = localStorage.getItem('myTeamName');
+  return !!myTeamName && team.name === myTeamName;
+}
 
   canLock(): boolean {
     const bids = this.teams.map((t: TeamData) => t.currentBid);

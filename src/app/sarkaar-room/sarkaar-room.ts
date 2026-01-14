@@ -85,6 +85,9 @@ export class SarkaarRoom implements OnDestroy {
       await this.storeGameControlsApi(this.code, this.bidInterval, this.maxBidAmount);
       // Store room code for later use (for end game)
       localStorage.setItem('roomCode', this.code);
+      localStorage.setItem('isHost', 'true');
+      localStorage.setItem('myTeamName', this.teamName);
+
       this.joined = true;
       this.isLead = true;
     } catch (err: any) {
@@ -110,6 +113,9 @@ export class SarkaarRoom implements OnDestroy {
         await this.roomService.storeTeam(this.teamName, this.code).toPromise();
         // Store room code for later use (for end game)
         localStorage.setItem('roomCode', this.code);
+        localStorage.removeItem('isHost');
+        localStorage.setItem('myTeamName', this.teamName);
+
         this.joined = true;
         this.isLead = false;
         this.teamCode = result.teamCode;
@@ -172,6 +178,7 @@ export class SarkaarRoom implements OnDestroy {
       if (success) {
         this.joined = true;
         this.isLead = false;
+        localStorage.removeItem('isHost');
         // Redirect to game page immediately
         this.router.navigate(['/sarkaar-online']);
       } else {

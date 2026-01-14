@@ -21,17 +21,22 @@
     <div class="bid-section">
       <div class="bid-input-spinner-wrapper">
         <input type="number" [(ngModel)]="currentBidAmount" [max]="maxBidAmount || team.balance" [min]="minimumBid" class="bid-input with-spinner"
-          [disabled]="isLocked" placeholder="Enter bid" />
+          [disabled]="!canBid || isLocked" placeholder="Enter bid" />
         <div class="custom-spinner-btns">
-          <button class="spinner-btn up" (click)="changeBid('up')" [disabled]="isLocked || (currentBidAmount ?? 0) >= (maxBidAmount || team.balance)">&#9650;</button>
-          <button class="spinner-btn down" (click)="changeBid('down')" [disabled]="isLocked || (currentBidAmount ?? 0) <= minimumBid">&#9660;</button>
+          <button class="spinner-btn up" (click)="changeBid('up')" [disabled]="!canBid ||isLocked || (currentBidAmount ?? 0) >= (maxBidAmount || team.balance)">&#9650;</button>
+          <button class="spinner-btn down" (click)="changeBid('down')" [disabled]="!canBid || isLocked || (currentBidAmount ?? 0) <= minimumBid">&#9660;</button>
         </div>
       </div>
 
       <button class="bid-button" (click)="onBidSubmit(currentBidAmount ?? 0)"
-        [disabled]="isLocked">
+        [disabled]="!canBid || isLocked">
         Place Bid
       </button>
+    </div>
+
+    <!-- Loader message -->
+    <div class="loader" *ngIf="isLoading">
+      Placing your bid, please wait...
     </div>
 
     <div class="answer-section" *ngIf="isLocked && isActive">
