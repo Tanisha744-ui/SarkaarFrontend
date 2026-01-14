@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SarkaarRoomService } from '../services/sarkaar-room.service';
 import { HttpClient } from '@angular/common/http';
+import { API_BASE } from '../api.config';
 
 @Component({
   selector: 'app-sarkaar-room',
@@ -161,7 +162,7 @@ export class SarkaarRoom implements OnDestroy {
       maxBidAmount
     };
     try {
-      await this.http.post('/api/GameControls', controls).toPromise();
+      await this.http.post(`${API_BASE}/api/GameControls`, controls).toPromise();
     } catch (err) {
       console.error('Failed to store game controls:', err);
     }

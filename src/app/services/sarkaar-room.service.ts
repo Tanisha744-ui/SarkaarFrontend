@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { API_BASE } from '../api.config';
 
 @Injectable({ providedIn: 'root' })
 export class SarkaarRoomService {
@@ -15,7 +16,7 @@ export class SarkaarRoomService {
 
   // Store game controls in backend DB
   storeGameControls(gameCode: string, interval: number, maxBidAmount: number) {
-    return this.http.post('/api/GameControls', {
+    return this.http.post(`${API_BASE}/api/GameControls`, {
       gameCode,
       interval,
       maxBidAmount
@@ -62,7 +63,7 @@ export class SarkaarRoomService {
   
     // Store team in backend DB
     storeTeam(teamName: string, gameCode: string) {
-      return this.http.post('/api/Team/create', { name: teamName, gameCode });
+      return this.http.post(`${API_BASE}/api/Team/create`, { name: teamName, gameCode });
     }
 
   createRoom(teamName: string): Promise<string> {
@@ -81,7 +82,7 @@ export class SarkaarRoomService {
     return this.hubConnection.invoke('JoinTeam', code, teamName);
   }
   getGameControls(gameCode: string) {
-    return this.http.get(`/api/GameControls/${gameCode}`);
+    return this.http.get(`${API_BASE}/api/GameControls/${gameCode}`);
   }
 
   // Game started logic

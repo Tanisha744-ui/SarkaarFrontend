@@ -19,7 +19,7 @@ export class BidSignalRService {
   startConnection(gameId: number) {
     if (this.hubConnection) return;
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('/sarkaarroomhub')
+      .withUrl('https://triogamebackend.onrender.com/sarkaarRoomHub')
       .withAutomaticReconnect()
       .build();
     this.hubConnection.on('BidReceived', (data: any) => {

@@ -24,8 +24,8 @@ interface TeamData {
   standalone: true
 })
 export class LandingpageOnlineComponent {
-    isLoading: boolean = true;
-    loadingMessage: string = 'Loading...';
+  isLoading: boolean = true;
+  loadingMessage: string = 'Loading...';
   // Toaster state
   toasterMessage: string | null = null;
   toasterTimeout: any = null;
@@ -42,7 +42,7 @@ export class LandingpageOnlineComponent {
   isProcessingResult = false;
   results: Record<string, 'none' | 'correct' | 'wrong'> = {};
   endGameConfirmOpen = false;
-  isHost=false;
+  isHost = false;
 
 
   constructor(
@@ -53,8 +53,8 @@ export class LandingpageOnlineComponent {
   ) { }
 
   ngOnInit() {
-    this.isHost = localStorage.getItem('isHost') === 'true' 
-           || localStorage.getItem('isHost') === '1';
+    this.isHost = localStorage.getItem('isHost') === 'true'
+      || localStorage.getItem('isHost') === '1';
 
     const storedStep = localStorage.getItem('stepCount');
     if (storedStep) {
@@ -91,16 +91,7 @@ export class LandingpageOnlineComponent {
             this.loadingMessage = '';
           },
           error: () => {
-            // fallback to local
-            this.teams = [
-              { teamId: 'A', name: 'Team A', balance: 100000, currentBid: undefined, gameId: 0 },
-              { teamId: 'B', name: 'Team B', balance: 100000, currentBid: undefined, gameId: 0 },
-              { teamId: 'C', name: 'Team C', balance: 100000, currentBid: undefined, gameId: 0 },
-              { teamId: 'D', name: 'Team D', balance: 100000, currentBid: undefined, gameId: 0 }
-            ];
-            this.initBidsAndSignalR();
-            this.isLoading = false;
-            this.loadingMessage = '';
+            this.showToaster('Failed to fetch teams. Please try again.');
           }
         });
         // Fetch game controls
@@ -120,29 +111,29 @@ export class LandingpageOnlineComponent {
   }
 
   private initBidsAndSignalR() {
-  this.bidService.getBids().subscribe((bids: BidDto[]) => {
+    this.bidService.getBids().subscribe((bids: BidDto[]) => {
 
-    // Map bids to teams
-    for (const bid of bids) {
-      const team = this.teams.find(t => t.id === bid.teamId);
-      if (team) {
-        team.currentBid = bid.amount;
-        team.gameId = bid.gameId;
+      // Map bids to teams
+      for (const bid of bids) {
+        const team = this.teams.find(t => t.id === bid.teamId);
+        if (team) {
+          team.currentBid = bid.amount;
+          team.gameId = bid.gameId;
+        }
       }
-    }
 
-    // 🔥 Start SignalR ONCE with real gameId
-    const gameId = bids[0]?.gameId;
-    if (gameId) {
-      this.bidSignalR.startConnection(gameId);
-    }
-  });
+      // 🔥 Start SignalR ONCE with real gameId
+      const gameId = bids[0]?.gameId;
+      if (gameId) {
+        this.bidSignalR.startConnection(gameId);
+      }
+    });
 
-  // Realtime updates
-  this.bidSignalR.bidReceived$.subscribe(() => {
-    this.fetchBidsFromBackend();
-  });
-}
+    // Realtime updates
+    this.bidSignalR.bidReceived$.subscribe(() => {
+      this.fetchBidsFromBackend();
+    });
+  }
 
 
   fetchBidsFromBackend() {
@@ -164,9 +155,9 @@ export class LandingpageOnlineComponent {
     });
   }
   canEditTeam(team: TeamData): boolean {
-  const myTeamName = localStorage.getItem('myTeamName');
-  return !!myTeamName && team.name === myTeamName;
-}
+    const myTeamName = localStorage.getItem('myTeamName');
+    return !!myTeamName && team.name === myTeamName;
+  }
 
   canLock(): boolean {
     const bids = this.teams.map((t: TeamData) => t.currentBid);
@@ -189,35 +180,35 @@ export class LandingpageOnlineComponent {
   }
 
   onBidPlaced(amount: number, teamId: string) {
-  const team = this.teams.find(t => t.teamId === teamId);
-  if (!team || !team.id) return;
+    const team = this.teams.find(t => t.teamId === teamId);
+    if (!team || !team.id) return;
 
-  if (amount !== 0) {
-    const minBid = this.getMinimumBid(teamId);
-    if (amount < minBid) {
-      this.showToaster(`Bid must be at least ${minBid}`);
-      return;
+    if (amount !== 0) {
+      const minBid = this.getMinimumBid(teamId);
+      if (amount < minBid) {
+        this.showToaster(`Bid must be at least ${minBid}`);
+        return;
+      }
     }
+
+    this.bidService.createBid({
+      teamId: team.id,
+      amount,
+      gameId: team.gameId ?? 0
+    }).subscribe({
+      error: err => console.error('Bid create error:', err),
+      next: () => {
+        // Broadcast bid via SignalR for real-time update
+        this.bidSignalR.sendBid({
+          gameId: team.gameId ?? 0,
+          teamId: team.id!,
+          amount
+        });
+        // After placing bid, fetch latest bids from backend
+        this.fetchBidsFromBackend();
+      }
+    });
   }
-
-  this.bidService.createBid({
-    teamId: team.id,
-    amount,
-    gameId: team.gameId ?? 0
-  }).subscribe({
-    error: err => console.error('Bid create error:', err),
-    next: () => {
-      // Broadcast bid via SignalR for real-time update
-      this.bidSignalR.sendBid({
-        gameId: team.gameId ?? 0,
-        teamId: team.id!,
-        amount
-      });
-      // After placing bid, fetch latest bids from backend
-      this.fetchBidsFromBackend();
-    }
-  });
-}
 
 
   showToaster(message: string) {

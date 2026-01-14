@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE } from '../api.config';
 
 export interface BidDto {
   id: number;
@@ -19,7 +20,7 @@ export interface CreateBidDto {
 
 @Injectable({ providedIn: 'root' })
 export class BidService {
-  private apiUrl = '/api/Bid';
+  private apiUrl = `${API_BASE}/api/Bid`;
 
   constructor(private http: HttpClient) {}
 
