@@ -18,7 +18,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-
   background:
     radial-gradient(
       1200px 800px at 80% 10%,
@@ -44,7 +43,6 @@
 
 .game-wrapper {
   width: 100%;
-  /* max-width: 1400px; */
   padding: 20px;
 }
 
@@ -90,8 +88,6 @@
   filter: blur(14px);
   opacity: 0.6;
 }
-
-
 
 .card.warning {
   border: 2px solid #ffb703;
@@ -597,8 +593,7 @@ button:hover {
 
 .create-btn {
   background: linear-gradient(135deg, #00f5d4, #4361ee);
-  box-shadow: 0 0 18px rgba(0, 245, 212, 0.6);
-  
+  box-shadow: 0 0 18px rgba(0, 245, 212, 0.6);  
 }
 
 .create-btn:hover {
@@ -615,6 +610,17 @@ button:hover {
 .join-btn:hover {
   transform: scale(1.05);
   box-shadow: 0 0 30px rgba(76, 201, 240, 0.9);
+}
+
+.viewer-btn {
+  margin-top: 14px;
+  background: linear-gradient(135deg, #00f5d4, #4361ee);
+  box-shadow: 0 0 18px rgba(0, 245, 212, 0.6);  
+}
+
+.viewer-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 28px rgba(0, 245, 212, 0.9);
 
 }
 
@@ -921,7 +927,7 @@ button:hover {
   /* margin-top: 1px; */
 }
 .return-home-btn:hover {
-  background: linear-gradient(135deg, #bef7ef, #c4adf4);
+  background: linear-gradient(135deg, #9e6af8, #76daf8);
   transform: scale(1.05);
 }
 /* Blur effect for the player cards row */
