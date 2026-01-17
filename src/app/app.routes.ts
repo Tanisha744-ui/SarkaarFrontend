@@ -29,7 +29,7 @@ export const routes: Routes = [
       { path: 'sarkaar-room', component: SarkaarRoom },
       { path: 'team-selection', component: TeamSelection },
       { path: 'game', component: Landingpage },
-      { path: 'sarkaar-online', component: LandingpageOnlineComponent, canActivate: [SarkaarRoomGuard, AuthGuard] },
+      { path: 'sarkaar-online', component: LandingpageOnlineComponent, canActivate: [AuthGuard] },
       { path: 'imposter-game', component: ImposterGame },
       { path: 'tambola', component: Tambola },
       { path: 'tambola-game', component: TambolaGame },

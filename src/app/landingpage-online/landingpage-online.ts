@@ -7,6 +7,7 @@ import { SarkaarRoomService } from '../services/sarkaar-room.service';
 import { BidService, BidDto } from '../services/bid.service';
 import { BidSignalRService } from '../services/bid-signalr.service';
 import { API_BASE } from '../api.config';
+import { FormsModule } from '@angular/forms';
 
 interface TeamData {
   teamId: string;
@@ -19,7 +20,7 @@ interface TeamData {
 
 @Component({
   selector: 'app-landingpage-online',
-  imports: [TeamcardOnline, NgFor, NgIf, NgClass, Timer],
+  imports: [TeamcardOnline, NgFor, NgIf, NgClass, Timer, FormsModule],
   templateUrl: './landingpage-online.html',
   styleUrl: './landingpage-online.css',
   standalone: true
@@ -44,6 +45,9 @@ export class LandingpageOnlineComponent {
   results: Record<string, 'none' | 'correct' | 'wrong'> = {};
   endGameConfirmOpen = false;
   isHost = false;
+  isChatOpen: boolean = false;
+  chatMessages: { sender: string; text: string }[] = [];
+  newChatMessage: string = '';
 
 
   constructor(
@@ -54,10 +58,10 @@ export class LandingpageOnlineComponent {
   ) { }
 
   ngOnInit() {
-    this.isHost = localStorage.getItem('isHost') === 'true'
-      || localStorage.getItem('isHost') === '1';
+    this.isHost = sessionStorage.getItem('isHost') === 'true'
+      || sessionStorage.getItem('isHost') === '1';
 
-    const storedStep = localStorage.getItem('stepCount');
+    const storedStep = sessionStorage.getItem('stepCount');
     if (storedStep) {
       const parsed = parseInt(storedStep, 10);
       if (!isNaN(parsed) && parsed > 0) {
@@ -65,11 +69,11 @@ export class LandingpageOnlineComponent {
       }
     }
     // Detect online mode by checking if roomCode exists
-    this.isOnline = !!localStorage.getItem('roomCode');
+    this.isOnline = !!sessionStorage.getItem('roomCode');
 
     // Fetch teams and game controls from backend if online
     if (this.isOnline) {
-      const gameCode = localStorage.getItem('roomCode');
+      const gameCode = sessionStorage.getItem('roomCode');
       if (gameCode) {
         this.isLoading = true;
         this.loadingMessage = 'Loading teams...';
@@ -109,6 +113,19 @@ export class LandingpageOnlineComponent {
       this.isLoading = false;
       this.loadingMessage = '';
     }
+
+    const roomCode = sessionStorage.getItem('roomCode');
+    if (roomCode) {
+      // Fetch existing chat messages
+      this.bidSignalR.fetchChatMessages(roomCode).subscribe(messages => {
+        this.chatMessages = messages;
+      });
+
+      // Subscribe to real-time chat updates
+      this.bidSignalR.chatReceived$.subscribe((message: { sender: string; text: string }) => {
+        this.chatMessages.push(message);
+      });
+    }
   }
 
   private initBidsAndSignalR() {
@@ -130,10 +147,14 @@ export class LandingpageOnlineComponent {
       }
     });
 
-    // Realtime updates
-    this.bidSignalR.bidReceived$.subscribe(() => {
-      this.fetchBidsFromBackend();
+    this.bidSignalR.bidReceived$.subscribe((bid) => {
+      const team = this.teams.find(t => t.id === bid.teamId);
+      if (team) {
+        team.currentBid = bid.amount;
+        team.gameId = bid.gameId;
+      }
     });
+
   }
 
 
@@ -155,9 +176,15 @@ export class LandingpageOnlineComponent {
       }
     });
   }
+  isSpectator(): boolean {
+  return sessionStorage.getItem('isSpectator') === 'true';
+}
+
   canEditTeam(team: TeamData): boolean {
-    const myTeamName = localStorage.getItem('myTeamName');
-    return !!myTeamName && team.name === myTeamName;
+    if(this.isSpectator()) return false;
+    const myTeamName = sessionStorage.getItem('myTeamName');
+    if(!myTeamName) return false; 
+    return team.name===myTeamName;
   }
 
   canLock(): boolean {
@@ -183,7 +210,10 @@ export class LandingpageOnlineComponent {
   onBidPlaced(amount: number, teamId: string) {
     const team = this.teams.find(t => t.teamId === teamId);
     if (!team || !team.id) return;
-
+    if (!this.canEditTeam(team)) {
+    console.warn('Blocked bid attempt for team:', team.name);
+    return;
+  }
     if (amount !== 0) {
       const minBid = this.getMinimumBid(teamId);
       if (amount < minBid) {
@@ -314,12 +344,12 @@ export class LandingpageOnlineComponent {
   }
 
   confirmEndGame() {
-    const gameCode = localStorage.getItem('roomCode');
+    const gameCode = sessionStorage.getItem('roomCode');
     console.log('Deleting teams for gameCode:', gameCode);
     if (gameCode) {
       this.http.delete(`${API_BASE}/api/Team/bycode/${gameCode}`).subscribe({
         next: () => {
-          localStorage.removeItem('roomCode');
+          sessionStorage.removeItem('roomCode');
           window.location.href = '/index';
         },
         error: () => {
@@ -332,5 +362,32 @@ export class LandingpageOnlineComponent {
     this.endGameConfirmOpen = false;
   }
 
+  // Toggles the chat dropdown visibility
+toggleChatDropdown() {
+  this.isChatOpen = !this.isChatOpen;
+}
+
+// Sends a new chat message
+sendMessage() {
+  if (this.newChatMessage.trim()) {
+    const roomCode = sessionStorage.getItem('roomCode');
+    if (!roomCode) {
+      console.error('Room code not found. Cannot send message.');
+      return;
+    }
+
+    const message = {
+      roomCode,
+      sender: sessionStorage.getItem('myTeamName') || 'Unknown',
+      text: this.newChatMessage.trim()
+    };
+
+    this.chatMessages.push(message);
+    this.newChatMessage = '';
+
+    // Send message via SignalR and HTTP
+    this.bidSignalR.sendChatMessage(message);
+  }
+}
 
 }

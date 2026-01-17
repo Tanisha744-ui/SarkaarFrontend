@@ -7,7 +7,7 @@ import { API_BASE } from '../api.config';
 
 @Injectable({ providedIn: 'root' })
 export class SarkaarRoomService {
-    // ...existing code...
+  // ...existing code...
   private hubConnection: signalR.HubConnection;
   teams$ = new BehaviorSubject<string[]>([]);
   connectionState$ = new BehaviorSubject<'connecting' | 'connected' | 'error'>('connecting');
@@ -24,7 +24,7 @@ export class SarkaarRoomService {
   }
 
   constructor(private http: HttpClient) {
-      // Store team in backend DB
+    // Store team in backend DB
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl('https://triogamebackend.onrender.com/sarkaarRoomHub') // Adjusted to match backend port
       .withAutomaticReconnect()
@@ -41,6 +41,7 @@ export class SarkaarRoomService {
 
     // Listen for the real-time GameStarted event from backend
     this.hubConnection.on('GameStarted', () => {
+      console.log('GameStarted event received from backend');
       this.gameStarted$.next(true);
     });
 
@@ -60,11 +61,11 @@ export class SarkaarRoomService {
         this.lastError$.next(err.message);
       });
   }
-  
-    // Store team in backend DB
-    storeTeam(teamName: string, gameCode: string) {
-      return this.http.post(`${API_BASE}/api/Team/create`, { name: teamName, gameCode });
-    }
+
+  // Store team in backend DB
+  storeTeam(teamName: string, gameCode: string) {
+    return this.http.post(`${API_BASE}/api/Team/create`, { name: teamName, gameCode });
+  }
 
   createRoom(teamName: string): Promise<string> {
     return this.hubConnection.invoke('CreateRoom', teamName);
@@ -121,6 +122,15 @@ export class SarkaarRoomService {
 
   // Call this to notify all clients in the room to start the game
   notifyGameStarted(roomCode: string): Promise<void> {
-    return this.hubConnection.invoke('StartGame', roomCode);
+    console.log('Invoking StartGame for room code:', roomCode);
+    return this.hubConnection.invoke('StartGame', roomCode).then(()=>console.log('StartGame invoked successfully'))
+    .catch(err=>{
+      console.error('Error invoking StartGame:', err);
+    })
   }
+
+  joinRoomAsSpectator(roomCode: string, viewerName: string): Promise<void> {
+    return this.hubConnection.invoke('JoinRoomAsSpectator', roomCode, viewerName);
+  }
+
 }

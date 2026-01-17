@@ -60,4 +60,21 @@
       </div>
     </div>
   </div>
+
+  <div class="chat-container">
+    <button class="chat-button" (click)="toggleChatDropdown()">💬 Chat</button>
+    <div class="chat-dropdown" *ngIf="isChatOpen">
+      <div class="chat-header">Game Chat</div>
+      <div class="chat-messages">
+        <div *ngFor="let message of chatMessages" class="chat-message">
+          <span class="chat-sender">{{ message.sender }}:</span>
+          <span class="chat-text">{{ message.text }}</span>
+        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text" [(ngModel)]="newChatMessage" placeholder="Type a message..." />
+        <button (click)="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
 </div>

@@ -15,16 +15,15 @@ import { API_BASE } from '../api.config';
 })
 
 export class SarkaarRoom implements OnDestroy {
-      isProceeding: boolean = false;
-      proceedingMessage: string = '';
-    isLoading: boolean = false;
-    loadingMessage: string = '';
+  isProceeding: boolean = false;
+  proceedingMessage: string = '';
+  isLoading: boolean = false;
+  loadingMessage: string = '';
   private gameStartedSub: any;
   mode: 'none' | 'create' | 'join' | 'joinTeam' = 'none';
   teamName = '';
   code = '';
-  teamCode = '';
-  teamCodeInput = '';
+  isSpectator = false;
   memberName = '';
   teams: string[] = [];
   joined = false;
@@ -59,11 +58,10 @@ export class SarkaarRoom implements OnDestroy {
     this.mode = mode;
     this.teamName = '';
     this.code = '';
-    this.teamCode = '';
-    this.teamCodeInput = '';
     this.memberName = '';
     this.joined = false;
     this.isLead = (mode === 'create' || mode === 'join');
+    this.isSpectator = (mode == 'joinTeam');
   }
 
   async createRoom() {
@@ -79,15 +77,14 @@ export class SarkaarRoom implements OnDestroy {
       console.log('Creating room with team name:', this.teamName);
       const result = await this.roomService.createRoomWithTeamCode(this.teamName);
       this.code = result.roomCode;
-      this.teamCode = result.teamCode;
       // Store in backend DB
       await this.roomService.storeTeam(this.teamName, this.code).toPromise();
       // Store controls in backend DB (old service call removed)
       await this.storeGameControlsApi(this.code, this.bidInterval, this.maxBidAmount);
       // Store room code for later use (for end game)
-      localStorage.setItem('roomCode', this.code);
-      localStorage.setItem('isHost', 'true');
-      localStorage.setItem('myTeamName', this.teamName);
+      sessionStorage.setItem('roomCode', this.code);
+      sessionStorage.setItem('isHost', 'true');
+      sessionStorage.setItem('myTeamName', this.teamName);
 
       this.joined = true;
       this.isLead = true;
@@ -113,13 +110,12 @@ export class SarkaarRoom implements OnDestroy {
         // Store in backend DB
         await this.roomService.storeTeam(this.teamName, this.code).toPromise();
         // Store room code for later use (for end game)
-        localStorage.setItem('roomCode', this.code);
-        localStorage.removeItem('isHost');
-        localStorage.setItem('myTeamName', this.teamName);
+        sessionStorage.setItem('roomCode', this.code);
+        sessionStorage.removeItem('isHost');
+        sessionStorage.setItem('myTeamName', this.teamName);
 
         this.joined = true;
         this.isLead = false;
-        this.teamCode = result.teamCode;
       } else {
         // Show specific error if provided
         if (result.error === 'Game already started') {
@@ -139,18 +135,34 @@ export class SarkaarRoom implements OnDestroy {
   }
 
   async proceedToGame() {
+    console.log('Proceeding to game for room code:', this.code);
     this.isProceeding = true;
     this.proceedingMessage = 'Starting game...';
     // Notify all clients in the room to start the game
-    await this.roomService.notifyGameStarted(this.code);
-    // Save the real-time teams to localStorage for the game page
-    localStorage.setItem('teamNames', JSON.stringify(this.teams));
-    // Simulate a short delay for UX (optional, remove if not needed)
-    setTimeout(() => {
+    if (this.connectionState !== 'connected') {
+      console.error('SignalR connection is not established.');
       this.isProceeding = false;
       this.proceedingMessage = '';
-      this.router.navigate(['/sarkaar-online']);
-    }, 800);
+      return;
+    }
+    try {
+      console.log('Notifying game started for room code:', this.code);
+      await this.roomService.setGameStarted(this.code, true);
+      console.log('Game started notification sent successfully.');
+      localStorage.setItem('teamNames', JSON.stringify(this.teams));
+
+      setTimeout(() => {
+        console.log('Stored team names in localStorage:', this.teams);
+        console.log('Navigating to /sarkaar-online');
+        this.isProceeding = false;
+        this.proceedingMessage = '';
+        this.router.navigate(['/sarkaar-online']);
+      }, 800)
+    } catch (err) {
+      console.error('Error in proceeding the game:', err);
+      this.isProceeding = false;
+      this.proceedingMessage = '';
+    }
   }
   /**
    * Store game controls in backend using GameControls API
@@ -168,25 +180,13 @@ export class SarkaarRoom implements OnDestroy {
     }
   }
 
-  async joinTeam() {
-    if (!this.teamCodeInput || !this.memberName) return;
-    if (this.connectionState !== 'connected') {
-      alert('Not connected to server. Please wait or try again.');
-      return;
-    }
-    try {
-      const success = await this.roomService.joinTeamAsMember(this.teamCodeInput, this.memberName);
-      if (success) {
-        this.joined = true;
-        this.isLead = false;
-        localStorage.removeItem('isHost');
-        // Redirect to game page immediately
-        this.router.navigate(['/sarkaar-online']);
-      } else {
-        alert('Invalid team code or team full');
-      }
-    } catch (err: any) {
-      alert('Failed to join team: ' + (err?.message || err));
-    }
+  async joinAsSpectator() {
+    await this.roomService.joinRoomAsSpectator(this.code, this.memberName);
+
+    sessionStorage.setItem('roomCode', this.code);
+    sessionStorage.setItem('isSpectator', 'true');
+
+    this.router.navigate(['/sarkaar-online']);
   }
+
 }

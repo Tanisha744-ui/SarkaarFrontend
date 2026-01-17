@@ -114,27 +114,9 @@ export class TeamcardOnline implements OnChanges {
     // Clamp to [minimumBid, balance]
     roundedAmount = Math.max(this.minimumBid, Math.min(roundedAmount, this.team.balance));
     this.currentBidAmount = roundedAmount;
-
-    // Show loader
     this.isLoading = true;
-
-    // Call backend to create bid
-    const dto: CreateBidDto = {
-      teamId: parseInt(this.team.teamId, 10) || 0,
-      amount: roundedAmount,
-      gameId: this.team.gameId
-    };
-    this.bidService.createBid(dto).subscribe({
-      next: (bid) => {
-        this.isLoading = false; // Hide loader
-        this.bidChange.emit(roundedAmount); // Notify parent
-      },
-      error: () => {
-        this.isLoading = false; // Hide loader
-        // fallback: still emit, but could show error
-        this.bidChange.emit(roundedAmount);
-      }
-    });
+    this.bidChange.emit(roundedAmount);
+    
   }
 
   onAnswer(correct: boolean) {
