@@ -8,6 +8,7 @@ import { BidService, BidDto } from '../services/bid.service';
 import { BidSignalRService } from '../services/bid-signalr.service';
 import { API_BASE } from '../api.config';
 import { FormsModule } from '@angular/forms';
+import { LoaderComponent } from '../shared/loader/loader.component';
 
 interface TeamData {
   teamId: string;
@@ -20,7 +21,7 @@ interface TeamData {
 
 @Component({
   selector: 'app-landingpage-online',
-  imports: [TeamcardOnline, NgFor, NgIf, NgClass, Timer, FormsModule],
+  imports: [TeamcardOnline, NgFor, NgIf, NgClass, Timer, FormsModule, LoaderComponent],
   templateUrl: './landingpage-online.html',
   styleUrl: './landingpage-online.css',
   standalone: true

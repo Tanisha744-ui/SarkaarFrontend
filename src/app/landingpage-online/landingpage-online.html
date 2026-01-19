@@ -1,6 +1,5 @@
-<div *ngIf="isLoading" class="room-status room-loading">
-  <span>{{ loadingMessage }}</span>
-</div>
+<app-loader [isLoading]="isLoading" [loadingMessage]="loadingMessage"></app-loader>
+<!-- Replace inline loading message with the loader component -->
 <div class="landing-container">
   <div *ngIf="toasterMessage" class="toaster-card">
     <span class="toaster-message">{{ toasterMessage }}</span>
@@ -40,7 +39,7 @@
           <h2>🏆 Winner</h2>
           <div *ngIf="winnerTeam">
             <p class="winner-name">{{ winnerTeam.name }}</p>
-            <p class="winner-bid">Balance: {{ winnerTeam.balance }}</p>
+            <!-- <p class="winner-bid">Balance: {{ winnerTeam.balance }}</p> -->
           </div>
           <button class="close-winner" (click)="closeWinnerModal()">Close</button>
         </div>
@@ -63,8 +62,14 @@
 
   <div class="chat-container">
     <button class="chat-button" (click)="toggleChatDropdown()">💬 Chat</button>
-    <div class="chat-dropdown" *ngIf="isChatOpen">
-      <div class="chat-header">Game Chat</div>
+    <div class="chat-dropdown" *ngIf="isChatOpen" style="background: rgba(0, 0, 0, 0.5);">
+      <div class="chat-header" style="position: relative;">
+        Game Chat
+        <button class="chat-close" (click)="toggleChatDropdown()" aria-label="Close" 
+                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; color: #333; font-weight: bold;">
+          &times;
+        </button>
+      </div>
       <div class="chat-messages">
         <div *ngFor="let message of chatMessages" class="chat-message">
           <span class="chat-sender">{{ message.sender }}:</span>

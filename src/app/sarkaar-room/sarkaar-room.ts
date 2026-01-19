@@ -5,13 +5,14 @@ import { Router } from '@angular/router';
 import { SarkaarRoomService } from '../services/sarkaar-room.service';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE } from '../api.config';
+import { LoaderComponent } from '../shared/loader/loader.component';
 
 @Component({
   selector: 'app-sarkaar-room',
   standalone: true,
   templateUrl: './sarkaar-room.html',
   styleUrl: './sarkaar-room.css',
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, LoaderComponent]
 })
 
 export class SarkaarRoom implements OnDestroy {

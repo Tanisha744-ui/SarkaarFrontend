@@ -35,10 +35,7 @@
         & Join</button>
       <button class="room-btn back room-action-btn" (click)="mode = 'none'">Back</button>
     </div>
-    <div *ngIf="isLoading" class="room-status room-loading"
-      style="z-index: 1000; position: absolute; left: 0; right: 0; top: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center;">
-      <span>{{ loadingMessage }}</span>
-    </div>
+    <app-loader [isLoading]="isLoading" [loadingMessage]="loadingMessage"></app-loader>
   </div>
 
   <!-- Join Room UI -->
@@ -47,10 +44,7 @@
     <input [(ngModel)]="code" placeholder="Room Code" maxlength="6" class="room-input" />
     <input [(ngModel)]="teamName" placeholder="Team Name" class="room-input" />
     <button class="room-btn join" (click)="joinRoom()" [disabled]="!code || !teamName || isLoading">Join</button>
-    <div *ngIf="isLoading" class="room-status room-loading"
-      style="z-index: 1000; position: absolute; left: 0; right: 0; top: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center;">
-      <span>{{ loadingMessage }}</span>
-    </div>
+    <app-loader [isLoading]="isLoading" [loadingMessage]="loadingMessage"></app-loader>
     <button class="room-btn back" (click)="mode = 'none'">Back</button>
   </div>
 

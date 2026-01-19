@@ -1,6 +1,7 @@
 import { NgClass, NgIf } from '@angular/common';
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LoaderComponent } from '../shared/loader/loader.component';
 
 interface TeamData {
   teamId: string;
@@ -13,10 +14,10 @@ import { BidService, CreateBidDto } from '../services/bid.service';
 
 @Component({
   selector: 'app-teamcard-online',
-  imports: [NgClass, NgIf, FormsModule],
+  standalone: true,
+  imports: [NgClass, NgIf, FormsModule, LoaderComponent],
   templateUrl: './teamcard-online.html',
   styleUrl: './teamcard-online.css',
-  standalone: true
 })
 export class TeamcardOnline implements OnChanges {
     private bidService = inject(BidService);
@@ -37,6 +38,7 @@ export class TeamcardOnline implements OnChanges {
   currentBidAmount: number | undefined;
   stepCount: number = 10; // fallback, but use bidInterval if provided
   isLoading: boolean = false; // New state for loader
+  loadingMessage: string = ''; // Add missing property
 
   // Helper method to safely check if bid exceeds balance
   isBidExceedingBalance(): boolean {
@@ -93,6 +95,7 @@ export class TeamcardOnline implements OnChanges {
   onBidSubmit(amount: number) {
     if (amount === undefined || amount === null || isNaN(amount)) {
       this.bidChange.emit(0);
+      this.isLoading = false; // Ensure loader is stopped for invalid input
       return;
     }
     const interval = this.bidInterval > 0 ? this.bidInterval : 10;
@@ -115,8 +118,18 @@ export class TeamcardOnline implements OnChanges {
     roundedAmount = Math.max(this.minimumBid, Math.min(roundedAmount, this.team.balance));
     this.currentBidAmount = roundedAmount;
     this.isLoading = true;
+
+    // Simulate bid submission process (replace with actual service call if needed)
+    this.bidService.createBid({ teamId: parseInt(this.team.teamId, 10), amount: roundedAmount }).subscribe({
+      next: () => {
+        this.isLoading = false; // Stop loader on success
+      },
+      error: () => {
+        this.isLoading = false; // Stop loader on error
+      }
+    });
+
     this.bidChange.emit(roundedAmount);
-    
   }
 
   onAnswer(correct: boolean) {

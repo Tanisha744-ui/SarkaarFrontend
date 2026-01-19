@@ -2,15 +2,11 @@ import { Injectable, NgZone } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { API_BASE } from '../api.config';
 
 @Injectable({ providedIn: 'root' })
 export class BidSignalRService {
-    sendBid(bid: { gameId: number, teamId: number, amount: number }) {
-      if (this.hubConnection) {
-        this.hubConnection.invoke('SendBid', bid)
-          .catch(err => console.error('SignalR sendBid error:', err));
-      }
-    }
+    
     private hubConnection: signalR.HubConnection | null = null;
     private bidReceivedSubject = new Subject<{ gameId: number, teamId: number, amount: number }>();
     bidReceived$ = this.bidReceivedSubject.asObservable();
@@ -46,22 +42,26 @@ export class BidSignalRService {
       this.hubConnection = null;
     }
   }
-
+  sendBid(bid: { gameId: number, teamId: number, amount: number }) {
+      if (!this.hubConnection) return;
+      this.hubConnection.invoke('SendBid', bid.gameId,bid.teamId,bid.amount)
+        .catch(err => console.error('SignalR sendBid error:', err));
+    }
   sendChatMessage(message: { roomCode: string; sender: string; text: string }) {
     if (this.hubConnection) {
-      this.hubConnection.invoke('SendChatMessage', message)
+      this.hubConnection.invoke('SendChatMessage', message.roomCode,message.sender, message.text)
         .catch(err => console.error('SignalR sendChatMessage error:', err));
     }
-    this.http.post('/api/chat/send', message).subscribe({
+    this.http.post(`${API_BASE}/api/chat/send`, message).subscribe({
       error: err => console.error('HTTP sendChatMessage error:', err)
     });
   }
 
   fetchChatMessages(roomCode: string) {
-    return this.http.get<{ sender: string; text: string }[]>(`/api/chat/get/${roomCode}`);
+    return this.http.get<{ sender: string; text: string }[]>(`${API_BASE}/api/chat/get/${roomCode}`);
   }
 
   clearChatMessages(roomCode: string) {
-    return this.http.delete(`/api/chat/clear/${roomCode}`);
+    return this.http.delete(`${API_BASE}/api/chat/clear/${roomCode}`);
   }
 }

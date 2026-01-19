@@ -34,10 +34,8 @@
       </button>
     </div>
 
-    <!-- Loader message -->
-    <div class="loader" *ngIf="isLoading">
-      Placing your bid, please wait...
-    </div>
+    <!-- Loader component -->
+    <app-loader [isLoading]="isLoading" [loadingMessage]="loadingMessage"></app-loader>
 
     <div class="answer-section" *ngIf="isLocked && isActive">
       <p class="answer-label">Answer?</p>
