@@ -1,85 +1,84 @@
-<app-loader [isLoading]="isLoading" [loadingMessage]="loadingMessage"></app-loader>
-<!-- Replace inline loading message with the loader component -->
-<div class="landing-container">
-  <div *ngIf="toasterMessage" class="toaster-card">
-    <span class="toaster-message">{{ toasterMessage }}</span>
-    <button class="toaster-close" (click)="closeToaster()" aria-label="Close">&times;</button>
-  </div>
-  <div class="timer-wrapper" *ngIf="isGameLocked">
-    <app-timer #roundTimer (finished)="onTimerFinished()"></app-timer>
-  </div>
-  <div class="game-header">
-    <h1 class="game-title">👑 Sarkaar</h1>
-    <p class="game-subtitle">
-      Bid smart. Answer right. Rule the game.
-    </p>
-  </div>
-
-  <div class="main-content-area">
-    <div class="team-grid" [ngClass]="{'two-columns': teams.length === 2}">
-      <app-teamcard-online *ngFor="let team of teams" [team]="team" [canBid]="canEditTeam(team)" [isLocked]="isGameLocked"
-        [isActive]="activeTeam === team.teamId" [answerEnabled]="!!roundTimer?.running"
-        [resultState]="results[team.teamId] || 'none'" [minimumBid]="getMinimumBid(team.teamId)"
-        [bidInterval]="gameControls?.interval || bidInterval" [maxBidAmount]="gameControls?.maxBidAmount"
-        (bidChange)="onBidPlaced($event, team.teamId)" (answer)="handleAnswer($event, team.teamId)">
-      </app-teamcard-online>
-    </div>
-    <div *ngIf="isHost" class="host-controls">
-      <div class="lock-wrapper" *ngIf="!isGameLocked">
-        <button class="lock-button" (click)="lockBids()" [disabled]="!canLock()">
-          🔒 Lock Bids
-        </button>
-        <button class="winner-button" (click)="showWinner()" [disabled]="teams.length === 0"
-          *ngIf="hasPlayedAtLeastOneRound">
-          🏆 Show Winner
-        </button>
+<div class="layout-container">
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <app-loader [isLoading]="isLoading" [loadingMessage]="loadingMessage"></app-loader>
+    <!-- Replace inline loading message with the loader component -->
+    <div class="landing-container">
+      <div *ngIf="toasterMessage" class="toaster-card">
+        <span class="toaster-message">{{ toasterMessage }}</span>
+        <button class="toaster-close" (click)="closeToaster()" aria-label="Close">&times;</button>
       </div>
-      <div class="winner-modal" *ngIf="winnerModalOpen">
-        <div class="winner-content animate-winner">
-          <h2>🏆 Winner</h2>
-          <div *ngIf="winnerTeam">
-            <p class="winner-name">{{ winnerTeam.name }}</p>
-            <!-- <p class="winner-bid">Balance: {{ winnerTeam.balance }}</p> -->
+      <div class="timer-wrapper" *ngIf="isGameLocked">
+        <app-timer #roundTimer (finished)="onTimerFinished()"></app-timer>
+      </div>
+      <div class="game-header">
+        <h1 class="game-title">👑 Sarkaar</h1>
+        <p class="game-subtitle">
+          Bid smart. Answer right. Rule the game.
+        </p>
+      </div>
+
+      <div class="main-content-area">
+        <div class="team-grid" [style.gridTemplateColumns]="getGridColumns(teams.length)">
+          <app-teamcard-online *ngFor="let team of teams" [team]="team" [canBid]="canEditTeam(team)" [isLocked]="isGameLocked"
+            [isActive]="activeTeam === team.teamId" [answerEnabled]="!!roundTimer?.running"
+            [resultState]="results[team.teamId] || 'none'" [minimumBid]="getMinimumBid(team.teamId)"
+            [bidInterval]="gameControls?.interval || bidInterval" [maxBidAmount]="gameControls?.maxBidAmount"
+            (bidChange)="onBidPlaced($event, team.teamId)" (answer)="handleAnswer($event, team.teamId)">
+          </app-teamcard-online>
+        </div>
+        <div *ngIf="isHost" class="host-controls">
+          <div class="lock-wrapper" *ngIf="!isGameLocked">
+            <button class="lock-button" (click)="lockBids()" [disabled]="!canLock()">
+              🔒 Lock Bids
+            </button>
+            <button class="winner-button" (click)="showWinner()" [disabled]="teams.length === 0"
+              *ngIf="hasPlayedAtLeastOneRound">
+              🏆 Show Winner
+            </button>
           </div>
-          <button class="close-winner" (click)="closeWinnerModal()">Close</button>
+          <div class="winner-modal" *ngIf="winnerModalOpen">
+            <div class="winner-content animate-winner">
+              <h2>🏆 Winner</h2>
+              <div *ngIf="winnerTeam">
+                <p class="winner-name">{{ winnerTeam.name }}</p>
+                <!-- <p class="winner-bid">Balance: {{ winnerTeam.balance }}</p> -->
+              </div>
+              <button class="close-winner" (click)="closeWinnerModal()">Close</button>
+            </div>
+          </div>
+          <button *ngIf="isOnline && hasPlayedAtLeastOneRound" (click)="openEndGameConfirm()"
+            style="margin-top: 20px; background: #e74c3c; color: white;">End Game</button>
+
+          <div class="endgame-modal" *ngIf="endGameConfirmOpen">
+            <div class="endgame-content animate-winner">
+              <h2>End Game?</h2>
+              <p>Are you sure you want to end the game? This action cannot be undone.</p>
+              <div style="display: flex; gap: 16px; justify-content: center; margin-top: 20px;">
+                <button (click)="confirmEndGame()" style="background: #e74c3c; color: white;">End Game</button>
+                <button (click)="cancelEndGame()" style="background: #bdc3c7; color: #222;">Cancel</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <button *ngIf="isOnline && hasPlayedAtLeastOneRound" (click)="openEndGameConfirm()"
-        style="margin-top: 20px; background: #e74c3c; color: white;">End Game</button>
-
-      <div class="endgame-modal" *ngIf="endGameConfirmOpen">
-        <div class="endgame-content animate-winner">
-          <h2>End Game?</h2>
-          <p>Are you sure you want to end the game? This action cannot be undone.</p>
-          <div style="display: flex; gap: 16px; justify-content: center; margin-top: 20px;">
-            <button (click)="confirmEndGame()" style="background: #e74c3c; color: white;">End Game</button>
-            <button (click)="cancelEndGame()" style="background: #bdc3c7; color: #222;">Cancel</button>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
+  <!-- Chat Area -->
   <div class="chat-container">
-    <button class="chat-button" (click)="toggleChatDropdown()">💬 Chat</button>
-    <div class="chat-dropdown" *ngIf="isChatOpen" style="background: rgba(0, 0, 0, 0.5);">
-      <div class="chat-header" style="position: relative;">
-        Game Chat
-        <button class="chat-close" (click)="toggleChatDropdown()" aria-label="Close" 
-                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; color: #333; font-weight: bold;">
-          &times;
-        </button>
+    <div class="chat-header">
+      Game Chat
+    </div>
+    <div class="chat-messages">
+      <div *ngFor="let message of chatMessages" class="chat-message">
+        <span class="chat-sender">{{ message.sender }}:</span>
+        <span class="chat-text">{{ message.text }}</span>
       </div>
-      <div class="chat-messages">
-        <div *ngFor="let message of chatMessages" class="chat-message">
-          <span class="chat-sender">{{ message.sender }}:</span>
-          <span class="chat-text">{{ message.text }}</span>
-        </div>
-      </div>
-      <div class="chat-input">
-        <input type="text" [(ngModel)]="newChatMessage" placeholder="Type a message..." />
-        <button (click)="sendMessage()">Send</button>
-      </div>
+    </div>
+    <div class="chat-input">
+      <input type="text" [(ngModel)]="newChatMessage" placeholder="Type a message..." (keydown)="onChatInputKeydown($event)" />
+      <button (click)="sendMessage()">Send</button>
     </div>
   </div>
 </div>

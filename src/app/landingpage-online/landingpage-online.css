@@ -458,13 +458,26 @@ app-teamcard-online {
   color: #38bdf8;
 }
 
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #0b0f1a; /* Match theme */
+  border-left: 1px solid #22d3ee; /* Themed divider */
+  max-height: 100%; /* Fixed height */
+  width: 100%; /* Ensure it occupies the full width */
+  box-sizing: border-box; /* Include padding and border in width */
+}
+
 .chat-messages {
   flex: 1;
-  padding: 12px;
-  overflow-y: auto;
-  background: #0b0f1a;
+  overflow-y: auto; /* Scrollable messages */
+  padding: 10px;
+  background: #0b0f1a; /* Match theme */
   scrollbar-width: thin;
   scrollbar-color: #22d3ee transparent;
+  word-wrap: break-word; /* Wrap long messages */
+  white-space: pre-wrap; /* Preserve spaces and wrap text */
 }
 
 .chat-messages::-webkit-scrollbar {
@@ -488,6 +501,8 @@ app-teamcard-online {
   color: #e5e7eb;
   font-size: 0.95rem;
   line-height: 1.4;
+  word-wrap: break-word; /* Wrap long messages */
+  white-space: pre-wrap; /* Prevent shifting due to long words */
 }
 
 .chat-sender {
@@ -498,6 +513,26 @@ app-teamcard-online {
 
 .chat-text {
   color: #e5e7eb;
+}
+
+/* Match scroller theme between game and chat */
+.main-content {
+  overflow-y: auto; /* Scrollable if content overflows */
+  scrollbar-width: thin;
+  scrollbar-color: #22d3ee transparent;
+}
+
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #22d3ee;
+  border-radius: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .chat-input {

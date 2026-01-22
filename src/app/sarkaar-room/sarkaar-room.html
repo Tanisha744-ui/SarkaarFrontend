@@ -9,7 +9,7 @@
   <div class="room-card" *ngIf="mode === 'none'">
     <h2>Play with Friends</h2>
     <div class="room-options">
-      <button class="room-btn create" (click)="selectMode('create')">Create Room (Lead)</button>
+      <button class="room-btn create" (click)="selectMode('create')">Create Room (Host)</button>
       <button class="room-btn join" (click)="selectMode('join')">Join Room (Lead)</button>
       <button class="room-btn team" (click)="selectMode('joinTeam')">View Game(Member)</button>
     </div>
@@ -28,11 +28,10 @@
       </label>
     </div>
     <div class="room-create-main">
-      <input [(ngModel)]="teamName" placeholder="Team Name" class="room-input" />
+      <input [(ngModel)]="teamName" placeholder="Room Name" class="room-input" />
     </div>
     <div class="room-create-actions">
-      <button class="room-btn create room-action-btn" (click)="createRoom()" [disabled]="!teamName || isLoading">Create
-        & Join</button>
+      <button class="room-btn create room-action-btn" (click)="createRoom()" [disabled]="!teamName || isLoading">Create Game</button>
       <button class="room-btn back room-action-btn" (click)="mode = 'none'">Back</button>
     </div>
     <app-loader [isLoading]="isLoading" [loadingMessage]="loadingMessage"></app-loader>
@@ -40,7 +39,7 @@
 
   <!-- Join Room UI -->
   <div *ngIf="mode === 'join' && !joined" class="room-card">
-    <h2>Join Room</h2>
+    <h2>Join Game</h2>
     <input [(ngModel)]="code" placeholder="Room Code" maxlength="6" class="room-input" />
     <input [(ngModel)]="teamName" placeholder="Team Name" class="room-input" />
     <button class="room-btn join" (click)="joinRoom()" [disabled]="!code || !teamName || isLoading">Join</button>
@@ -49,7 +48,7 @@
   </div>
 
 
-  <!-- After joining, show codes and teams for host (lead) -->
+  <!-- After joining, show codes and teams for host -->
   <div *ngIf="joined && isLead" class="room-card">
     <h2>Room Code: <span class="room-code">{{ code }}</span></h2>
     <h3>Teams Joined ({{ teams.length }}/10):</h3>

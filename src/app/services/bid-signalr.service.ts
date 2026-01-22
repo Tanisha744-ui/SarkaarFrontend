@@ -6,14 +6,14 @@ import { API_BASE } from '../api.config';
 
 @Injectable({ providedIn: 'root' })
 export class BidSignalRService {
-    
-    private hubConnection: signalR.HubConnection | null = null;
-    private bidReceivedSubject = new Subject<{ gameId: number, teamId: number, amount: number }>();
-    bidReceived$ = this.bidReceivedSubject.asObservable();
-    private chatReceivedSource = new Subject<{ sender: string; text: string }>();
-    chatReceived$ = this.chatReceivedSource.asObservable();
 
-  constructor(private ngZone: NgZone, private http: HttpClient) {}
+  private hubConnection: signalR.HubConnection | null = null;
+  private bidReceivedSubject = new Subject<{ gameId: number, teamId: number, amount: number }>();
+  bidReceived$ = this.bidReceivedSubject.asObservable();
+  private chatReceivedSource = new Subject<{ sender: string; text: string }>();
+  chatReceived$ = this.chatReceivedSource.asObservable();
+
+  constructor(private ngZone: NgZone, private http: HttpClient) { }
 
   startConnection(gameId: number) {
     if (this.hubConnection) return;
@@ -27,6 +27,7 @@ export class BidSignalRService {
       });
     });
     this.hubConnection.on('ChatMessageReceived', (message: { sender: string; text: string }) => {
+      console.log('SignalR ChatMessageReceived:', message);
       this.ngZone.run(() => {
         this.chatReceivedSource.next(message);
       });
@@ -43,13 +44,13 @@ export class BidSignalRService {
     }
   }
   sendBid(bid: { gameId: number, teamId: number, amount: number }) {
-      if (!this.hubConnection) return;
-      this.hubConnection.invoke('SendBid', bid.gameId,bid.teamId,bid.amount)
-        .catch(err => console.error('SignalR sendBid error:', err));
-    }
+    if (!this.hubConnection) return;
+    this.hubConnection.invoke('SendBid', bid.gameId, bid.teamId, bid.amount)
+      .catch(err => console.error('SignalR sendBid error:', err));
+  }
   sendChatMessage(message: { roomCode: string; sender: string; text: string }) {
     if (this.hubConnection) {
-      this.hubConnection.invoke('SendChatMessage', message.roomCode,message.sender, message.text)
+      this.hubConnection.invoke('SendChatMessage', message.roomCode, message.sender, message.text)
         .catch(err => console.error('SignalR sendChatMessage error:', err));
     }
     this.http.post(`${API_BASE}/api/chat/send`, message).subscribe({

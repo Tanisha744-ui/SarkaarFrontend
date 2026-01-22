@@ -63,8 +63,8 @@ export class SarkaarRoomService {
   }
 
   // Store team in backend DB
-  storeTeam(teamName: string, gameCode: string) {
-    return this.http.post(`${API_BASE}/api/Team/create`, { name: teamName, gameCode });
+  storeTeam(teamName: string, gameCode: string,balance:number) {
+    return this.http.post(`${API_BASE}/api/Team/create`, { name: teamName, gameCode,balance });
   }
 
   createRoom(teamName: string): Promise<string> {

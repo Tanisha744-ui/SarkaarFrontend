@@ -9,6 +9,7 @@ import { BidSignalRService } from '../services/bid-signalr.service';
 import { API_BASE } from '../api.config';
 import { FormsModule } from '@angular/forms';
 import { LoaderComponent } from '../shared/loader/loader.component';
+import { ChangeDetectorRef } from '@angular/core';
 
 interface TeamData {
   teamId: string;
@@ -52,6 +53,7 @@ export class LandingpageOnlineComponent {
 
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private http: HttpClient,
     private sarkaarRoomService: SarkaarRoomService,
     private bidService: BidService,
@@ -124,7 +126,9 @@ export class LandingpageOnlineComponent {
 
       // Subscribe to real-time chat updates
       this.bidSignalR.chatReceived$.subscribe((message: { sender: string; text: string }) => {
+        console.log('Received chat message:', message);
         this.chatMessages.push(message);
+        this.cdr.detectChanges();
       });
     }
   }
@@ -388,6 +392,24 @@ sendMessage() {
 
     // Send message via SignalR and HTTP
     this.bidSignalR.sendChatMessage(message);
+  }
+}
+
+// Add event listener for Enter key to send chat message
+onChatInputKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter') {
+    this.sendMessage();
+    event.preventDefault(); // Prevent default Enter behavior
+  }
+}
+
+getGridColumns(teamCount: number): string {
+  if (teamCount <= 2) {
+    return 'repeat(2, 1fr)';
+  } else if (teamCount === 3) {
+    return 'repeat(3, 1fr)';
+  } else {
+    return 'repeat(auto-fit, minmax(200px, 1fr))';
   }
 }
 
