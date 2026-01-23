@@ -51,20 +51,24 @@
   <!-- After joining, show codes and teams for host -->
   <div *ngIf="joined && isLead" class="room-card">
     <h2>Room Code: <span class="room-code">{{ code }}</span></h2>
-    <h3>Teams Joined ({{ teams.length }}/10):</h3>
+    <h3>Teams Joined ({{ nonHostTeams.length }}/10):</h3>
     <ul class="team-list">
-      <li *ngFor="let t of teams">{{ t }}</li>
+      <ng-container *ngFor="let t of nonHostTeams">
+        <li>{{ t }}</li>
+      </ng-container>
     </ul>
-    <button class="room-btn proceed" (click)="proceedToGame()" [disabled]="teams.length < 2">Proceed to Game</button>
+    <button class="room-btn proceed" (click)="proceedToGame()" [disabled]="nonHostTeams.length < 2">Proceed to Game</button>
     <button class="room-btn back" (click)="mode = 'none'">Back</button>
   </div>
 
   <!-- After joining, show waiting for host for non-lead teams -->
   <div *ngIf="joined && !isLead" class="room-card">
     <h2>Room Code: <span class="room-code">{{ code }}</span></h2>
-    <h3>Teams Joined ({{ teams.length }}/10):</h3>
+    <h3>Teams Joined ({{ nonHostTeams.length }}/10):</h3>
     <ul class="team-list">
-      <li *ngFor="let t of teams">{{ t }}</li>
+      <ng-container *ngFor="let t of nonHostTeams">
+        <li>{{ t }}</li>
+      </ng-container>
     </ul>
     <div class="waiting-host">Waiting for host to start the game...</div>
     <button class="room-btn back" (click)="mode = 'none'">Back</button>

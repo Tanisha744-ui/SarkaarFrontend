@@ -34,9 +34,17 @@ export class SarkaarRoom implements OnDestroy {
   // Online mode controls
   maxBidAmount: number = 100;
   bidInterval: number = 10;
+  hostTeam: string = ''; // Added to track the host's team
+  nonHostTeams: string[] = []; // Precomputed array for teams excluding the host's team
 
   constructor(private roomService: SarkaarRoomService, private router: Router, private http: HttpClient) {
-    this.roomService.teams$.subscribe(teams => this.teams = teams);
+    this.roomService.teams$.subscribe(teams => {
+      this.teams = teams;
+      if (this.isLead && teams.length > 0) {
+        this.hostTeam = teams[0]; // Assuming the host's team is the first in the list
+      }
+      this.nonHostTeams = teams.filter(t => t !== this.hostTeam); // Compute non-host teams
+    });
     this.roomService.connectionState$.subscribe(state => this.connectionState = state);
     this.roomService.lastError$.subscribe(err => this.lastError = err);
 

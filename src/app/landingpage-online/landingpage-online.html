@@ -19,13 +19,17 @@
       </div>
 
       <div class="main-content-area">
-        <div class="team-grid" [style.gridTemplateColumns]="getGridColumns(teams.length)">
-          <app-teamcard-online *ngFor="let team of teams" [team]="team" [canBid]="canEditTeam(team)" [isLocked]="isGameLocked"
-            [isActive]="activeTeam === team.teamId" [answerEnabled]="!!roundTimer?.running"
-            [resultState]="results[team.teamId] || 'none'" [minimumBid]="getMinimumBid(team.teamId)"
-            [bidInterval]="gameControls?.interval || bidInterval" [maxBidAmount]="gameControls?.maxBidAmount"
-            (bidChange)="onBidPlaced($event, team.teamId)" (answer)="handleAnswer($event, team.teamId)">
-          </app-teamcard-online>
+        <div class="team-grid" [ngClass]="{'two-columns': filteredTeams.length === 2, 'few-cards': filteredTeams.length < 3}" [style.gridTemplateColumns]="getGridColumns(filteredTeams.length)">
+          <ng-container *ngIf="filteredTeams.length > 0">
+            <ng-container *ngFor="let team of filteredTeams">
+              <app-teamcard-online [team]="team" [canBid]="canEditTeam(team)" [isLocked]="isGameLocked"
+                [isActive]="activeTeam === team.teamId" [answerEnabled]="!!roundTimer?.running"
+                [resultState]="results[team.teamId] || 'none'" [minimumBid]="getMinimumBid(team.teamId)"
+                [bidInterval]="gameControls?.interval || bidInterval" [maxBidAmount]="gameControls?.maxBidAmount"
+                (bidChange)="onBidPlaced($event, team.teamId)" (answer)="handleAnswer($event, team.teamId)">
+              </app-teamcard-online>
+            </ng-container>
+          </ng-container>
         </div>
         <div *ngIf="isHost" class="host-controls">
           <div class="lock-wrapper" *ngIf="!isGameLocked">

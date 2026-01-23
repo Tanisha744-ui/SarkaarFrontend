@@ -10,6 +10,7 @@ import { API_BASE } from '../api.config';
 import { FormsModule } from '@angular/forms';
 import { LoaderComponent } from '../shared/loader/loader.component';
 import { ChangeDetectorRef } from '@angular/core';
+import { Subject } from 'rxjs';
 
 interface TeamData {
   teamId: string;
@@ -51,6 +52,7 @@ export class LandingpageOnlineComponent {
   chatMessages: { sender: string; text: string }[] = [];
   newChatMessage: string = '';
 
+  filteredTeams: TeamData[] = [];
 
   constructor(
     private cdr: ChangeDetectorRef,
@@ -74,67 +76,97 @@ export class LandingpageOnlineComponent {
     // Detect online mode by checking if roomCode exists
     this.isOnline = !!sessionStorage.getItem('roomCode');
 
-    // Fetch teams and game controls from backend if online
-    if (this.isOnline) {
-      const gameCode = sessionStorage.getItem('roomCode');
-      if (gameCode) {
-        this.isLoading = true;
-        this.loadingMessage = 'Loading teams...';
-        // Fetch teams from backend and map to TeamData
-        this.http.get<any[]>(`${API_BASE}/api/Team/bycode/${gameCode}`).subscribe({
-          next: (teams) => {
-            this.teams = teams.map((t, idx) => ({
-              teamId: String.fromCharCode(65 + idx),
-              name: t.name,
-              balance: 100000,
-              currentBid: undefined,
-              gameId: 0,
-              id: t.id
-            }));
-            if (teams.length > 0 && teams[0].gameId) {
-              this.bidSignalR.startConnection(teams[0].gameId);
+    const gameCode = sessionStorage.getItem('roomCode');
+
+    if (!gameCode) {
+      console.error('Room code is missing. Cannot fetch teams.');
+      return;
+    }
+
+    this.isLoading = true;
+    this.loadingMessage = 'Loading teams...';
+
+    // Fetch teams from backend
+    this.http.get<any[]>(`${API_BASE}/api/Team/bycode/${gameCode}`).subscribe({
+      next: (teams) => {
+        this.teams = teams.map((t, idx) => ({
+          teamId: String.fromCharCode(65 + idx),
+          name: t.name,
+          balance: 100000,
+          currentBid: undefined,
+          gameId: 0,
+          id: t.id
+        }));
+
+        // Ensure hostTeamId is set correctly
+        let hostTeamId = sessionStorage.getItem('hostTeamId');
+        if (!hostTeamId) {
+          if (this.isHost && this.teams.length > 0) {
+            hostTeamId = this.teams[0].teamId; // Assume the first team belongs to the host
+            sessionStorage.setItem('hostTeamId', hostTeamId);
+            console.log('Default Host Team ID set to:', hostTeamId);
+          } else if (this.teams.length > 0) {
+            // Attempt to infer hostTeamId for non-host users
+            hostTeamId = this.teams[0].teamId; // Assume the first team belongs to the host
+            sessionStorage.setItem('hostTeamId', hostTeamId);
+            console.log('Inferred Host Team ID for non-host user:', hostTeamId);
+          } else {
+            console.error('Unable to set Host Team ID dynamically because the teams array is empty.');
+          }
+        }
+
+        // Update filteredTeams after ensuring hostTeamId
+        this.filteredTeams = this.getVisibleTeams();
+        this.cdr.detectChanges(); // Force template update
+
+        console.log('Teams fetched:', this.teams);
+        console.log('Filtered Teams:', this.filteredTeams);
+
+        // Initialize bids and SignalR updates
+        this.initBidsAndSignalR();
+
+        // Initialize chat updates
+        this.initChatUpdates();
+
+        // Fetch initial chat messages
+        const roomCode = sessionStorage.getItem('roomCode');
+        if (roomCode) {
+          this.bidSignalR.fetchChatMessages(roomCode).subscribe({
+            next: (messages) => {
+              console.log('Initial chat messages fetched:', messages);
+              this.chatMessages = messages;
+            },
+            error: (err) => {
+              console.error('Failed to fetch chat messages:', err);
             }
-            this.initBidsAndSignalR();
-            this.isLoading = false;
-            this.loadingMessage = '';
-          },
-          error: () => {
-            this.showToaster('Failed to fetch teams. Please try again.');
-          }
-        });
-        // Fetch game controls
-        this.sarkaarRoomService.getGameControls(gameCode).subscribe({
-          next: (controls) => {
-            this.gameControls = controls;
-          },
-          error: (err) => {
-            this.gameControls = null;
-          }
-        });
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Failed to fetch teams:', err);
+        this.showToaster('Failed to fetch teams. Please try again.');
+      },
+      complete: () => {
+        this.isLoading = false;
+        this.loadingMessage = '';
       }
-    } else {
-      this.isLoading = false;
-      this.loadingMessage = '';
-    }
+    });
 
-    const roomCode = sessionStorage.getItem('roomCode');
-    if (roomCode) {
-      // Fetch existing chat messages
-      this.bidSignalR.fetchChatMessages(roomCode).subscribe(messages => {
-        this.chatMessages = messages;
-      });
-
-      // Subscribe to real-time chat updates
-      this.bidSignalR.chatReceived$.subscribe((message: { sender: string; text: string }) => {
-        console.log('Received chat message:', message);
-        this.chatMessages.push(message);
-        this.cdr.detectChanges();
-      });
-    }
+    // Fetch game controls
+    this.sarkaarRoomService.getGameControls(gameCode).subscribe({
+      next: (controls) => {
+        this.gameControls = controls;
+      },
+      error: (err) => {
+        this.gameControls = null;
+      }
+    });
   }
 
   private initBidsAndSignalR() {
+    // Fetch initial bids from the backend
     this.bidService.getBids().subscribe((bids: BidDto[]) => {
+      console.log('Initial bids fetched:', bids);
 
       // Map bids to teams
       for (const bid of bids) {
@@ -145,23 +177,31 @@ export class LandingpageOnlineComponent {
         }
       }
 
-      // 🔥 Start SignalR ONCE with real gameId
+      // Start SignalR connection for real-time updates
       const gameId = bids[0]?.gameId;
       if (gameId) {
         this.bidSignalR.startConnection(gameId);
       }
     });
 
+    // Subscribe to real-time bid updates
     this.bidSignalR.bidReceived$.subscribe((bid) => {
+      console.log('Real-time bid received:', bid);
       const team = this.teams.find(t => t.id === bid.teamId);
       if (team) {
         team.currentBid = bid.amount;
         team.gameId = bid.gameId;
       }
     });
-
   }
 
+  private initChatUpdates() {
+    // Subscribe to real-time chat updates
+    this.bidSignalR.chatReceived$.subscribe((message: { sender: string; text: string }) => {
+      console.log('Real-time chat message received:', message);
+      this.chatMessages.push(message);
+    });
+  }
 
   fetchBidsFromBackend() {
     this.bidService.getBids().subscribe({
@@ -193,12 +233,19 @@ export class LandingpageOnlineComponent {
   }
 
   canLock(): boolean {
-    const bids = this.teams.map((t: TeamData) => t.currentBid);
-    // All teams must have entered a bid (including zero)
+    const hostTeamId = sessionStorage.getItem('hostTeamId');
+
+    // Exclude the host's team from the bid validation logic
+    const nonHostTeams = this.teams.filter((team) => team.teamId !== hostTeamId);
+    const bids = nonHostTeams.map((t: TeamData) => t.currentBid);
+
+    // All non-host teams must have entered a bid (including zero)
     if (bids.some((b: number | undefined | null) => b === undefined || b === null)) return false;
+
     // Find all non-zero bids
     const nonZeroBids = bids.filter((b: number | undefined | null) => typeof b === 'number' && b > 0) as number[];
     if (nonZeroBids.length === 0) return false; // At least one non-zero bid required
+
     // The maximum non-zero bid must be unique
     const max = Math.max(...nonZeroBids);
     const maxCount = nonZeroBids.filter((b: number) => b === max).length;
@@ -216,9 +263,10 @@ export class LandingpageOnlineComponent {
     const team = this.teams.find(t => t.teamId === teamId);
     if (!team || !team.id) return;
     if (!this.canEditTeam(team)) {
-    console.warn('Blocked bid attempt for team:', team.name);
-    return;
-  }
+      console.warn('Blocked bid attempt for team:', team.name);
+      return;
+    }
+
     if (amount !== 0) {
       const minBid = this.getMinimumBid(teamId);
       if (amount < minBid) {
@@ -227,12 +275,19 @@ export class LandingpageOnlineComponent {
       }
     }
 
+    // Show full-page loader
+    this.isLoading = true;
+    this.loadingMessage = 'Placing bid...';
+
     this.bidService.createBid({
       teamId: team.id,
       amount,
       gameId: team.gameId ?? 0
     }).subscribe({
-      error: err => console.error('Bid create error:', err),
+      error: err => {
+        console.error('Bid create error:', err);
+        this.isLoading = false; // Hide loader on error
+      },
       next: () => {
         // Broadcast bid via SignalR for real-time update
         this.bidSignalR.sendBid({
@@ -242,6 +297,7 @@ export class LandingpageOnlineComponent {
         });
         // After placing bid, fetch latest bids from backend
         this.fetchBidsFromBackend();
+        this.isLoading = false; // Hide loader after completion
       }
     });
   }
@@ -413,4 +469,41 @@ getGridColumns(teamCount: number): string {
   }
 }
 
+getVisibleTeams(): TeamData[] {
+    let hostTeamId = sessionStorage.getItem('hostTeamId');
+
+    if (!hostTeamId) {
+      console.warn('Host Team ID is missing during filtering. Attempting to set dynamically.');
+
+      if (this.isHost) {
+        if (this.teams.length > 0) {
+          hostTeamId = this.teams[0].teamId; // Assume the first team belongs to the host
+          sessionStorage.setItem('hostTeamId', hostTeamId);
+          console.log('Dynamically set Host Team ID to:', hostTeamId);
+        } else {
+          console.error('Unable to set Host Team ID dynamically because the teams array is empty.');
+          return []; // Return an empty array if teams are not available
+        }
+      } else {
+        console.warn('Unable to set Host Team ID dynamically for non-host users. Defaulting to show all teams.');
+        return this.teams;
+      }
+    }
+
+    console.log('Host Team ID:', hostTeamId);
+    console.log('All Teams:', this.teams);
+
+    // Filter teams based on the viewer's role
+    if (this.isHost) {
+      // Host should see all teams except their own
+      const visibleTeams = this.teams.filter(team => team.teamId !== hostTeamId);
+      console.log('Visible Teams for Host:', visibleTeams);
+      return visibleTeams;
+    } else {
+      // Other teams should see all teams except the host's team
+      const visibleTeams = this.teams.filter(team => team.teamId !== hostTeamId);
+      console.log('Visible Teams for Other Teams:', visibleTeams);
+      return visibleTeams;
+    }
+  }
 }

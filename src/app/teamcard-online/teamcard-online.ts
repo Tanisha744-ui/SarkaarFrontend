@@ -95,9 +95,9 @@ export class TeamcardOnline implements OnChanges {
   onBidSubmit(amount: number) {
     if (amount === undefined || amount === null || isNaN(amount)) {
       this.bidChange.emit(0);
-      this.isLoading = false; // Ensure loader is stopped for invalid input
       return;
     }
+
     const interval = this.bidInterval > 0 ? this.bidInterval : 10;
     let roundedAmount = Math.round(amount / interval) * interval;
     if (amount % interval === interval / 2) {
@@ -117,15 +117,14 @@ export class TeamcardOnline implements OnChanges {
     // Clamp to [minimumBid, balance]
     roundedAmount = Math.max(this.minimumBid, Math.min(roundedAmount, this.team.balance));
     this.currentBidAmount = roundedAmount;
-    this.isLoading = true;
 
     // Simulate bid submission process (replace with actual service call if needed)
     this.bidService.createBid({ teamId: parseInt(this.team.teamId, 10), amount: roundedAmount }).subscribe({
       next: () => {
-        this.isLoading = false; // Stop loader on success
+        // Bid submission successful
       },
       error: () => {
-        this.isLoading = false; // Stop loader on error
+        // Handle bid submission error
       }
     });
 
