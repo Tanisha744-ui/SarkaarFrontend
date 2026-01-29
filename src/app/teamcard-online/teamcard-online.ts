@@ -48,7 +48,7 @@ export class TeamcardOnline implements OnChanges {
   ngOnInit() {
     // Don't set initial value, let placeholder show
     this.currentBidAmount = undefined;
-    this.setTeamBalanceFromMaxBid();
+    // this.setTeamBalanceFromMaxBid();
     // Use bidInterval if provided
     if (this.bidInterval && this.bidInterval > 0) {
       this.stepCount = this.bidInterval;
@@ -63,21 +63,21 @@ export class TeamcardOnline implements OnChanges {
     }
   }
 
-  setTeamBalanceFromMaxBid() {
-    const maxBidStr = localStorage.getItem('maxBid');
-    if (maxBidStr && this.team) {
-      const maxBid = parseInt(maxBidStr, 10);
-      if (!isNaN(maxBid)) {
-        this.team.balance = maxBid;
-      }
-    }
-  }
+  // setTeamBalanceFromMaxBid() {
+  //   const maxBidStr = localStorage.getItem('maxBid');
+  //   if (maxBidStr && this.team) {
+  //     const maxBid = parseInt(maxBidStr, 10);
+  //     if (!isNaN(maxBid)) {
+  //       this.team.balance = maxBid;
+  //     }
+  //   }
+  // }
 
   ngOnChanges(changes: SimpleChanges) {
     // Keep local input value in sync when parent updates team.currentBid (e.g., reset to 0)
     if (changes['team'] && this.team) {
       this.currentBidAmount = this.team.currentBid ?? 0;
-      this.setTeamBalanceFromMaxBid();
+      // this.setTeamBalanceFromMaxBid();
     }
     // When locked/unlocked, ensure input reflects current team.bid
     if (changes['isLocked'] && this.team) {
@@ -119,14 +119,14 @@ export class TeamcardOnline implements OnChanges {
     this.currentBidAmount = roundedAmount;
 
     // Simulate bid submission process (replace with actual service call if needed)
-    this.bidService.createBid({ teamId: parseInt(this.team.teamId, 10), amount: roundedAmount }).subscribe({
-      next: () => {
-        // Bid submission successful
-      },
-      error: () => {
-        // Handle bid submission error
-      }
-    });
+    // this.bidService.createBid({ teamId: parseInt(this.team.teamId, 10), amount: roundedAmount }).subscribe({
+    //   next: () => {
+    //     // Bid submission successful
+    //   },
+    //   error: () => {
+    //     // Handle bid submission error
+    //   }
+    // });
 
     this.bidChange.emit(roundedAmount);
   }

@@ -65,4 +65,11 @@ export class BidSignalRService {
   clearChatMessages(roomCode: string) {
     return this.http.delete(`${API_BASE}/api/chat/clear/${roomCode}`);
   }
+  updateTeamBalance(teamId: number, newBalance: number) {
+  return this.http.put(
+    `${API_BASE}/api/team/update-balance/${teamId}`,
+    newBalance
+  );
+}
+
 }

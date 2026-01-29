@@ -1,4 +1,3 @@
-// ...existing code...
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
@@ -7,7 +6,6 @@ import { API_BASE } from '../api.config';
 
 @Injectable({ providedIn: 'root' })
 export class SarkaarRoomService {
-  // ...existing code...
   private hubConnection: signalR.HubConnection;
   teams$ = new BehaviorSubject<string[]>([]);
   connectionState$ = new BehaviorSubject<'connecting' | 'connected' | 'error'>('connecting');
@@ -63,8 +61,10 @@ export class SarkaarRoomService {
   }
 
   // Store team in backend DB
-  storeTeam(teamName: string, gameCode: string,balance:number) {
-    return this.http.post(`${API_BASE}/api/Team/create`, { name: teamName, gameCode,balance });
+  storeTeam(teamName: string, gameCode: string, balance: number) {
+    const payload = { name: teamName, gameCode, balance };
+    console.log('Payload being sent to /api/Team/create:', payload);
+    return this.http.post(`${API_BASE}/api/Team/create`, payload);
   }
 
   createRoom(teamName: string): Promise<string> {

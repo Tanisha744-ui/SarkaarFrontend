@@ -92,7 +92,7 @@ export class LandingpageOnlineComponent {
         this.teams = teams.map((t, idx) => ({
           teamId: String.fromCharCode(65 + idx),
           name: t.name,
-          balance: 100000,
+          balance: Number(t.Balance ?? t.balance ?? 0),
           currentBid: undefined,
           gameId: 0,
           id: t.id
@@ -198,9 +198,33 @@ export class LandingpageOnlineComponent {
   private initChatUpdates() {
     // Subscribe to real-time chat updates
     this.bidSignalR.chatReceived$.subscribe((message: { sender: string; text: string }) => {
-      console.log('Real-time chat message received:', message);
+      // Check if the sender is the host and append "(Host)" if not already present
+      if (message.sender === sessionStorage.getItem('myTeamName') && this.isHost && !message.sender.includes('(Host)')) {
+        message.sender += ' (Host)';
+      }
+
       this.chatMessages.push(message);
+      this.cdr.detectChanges(); // Force Angular to update the UI
     });
+
+    // Fetch initial chat messages
+    const roomCode = sessionStorage.getItem('roomCode');
+    if (roomCode) {
+      this.bidSignalR.fetchChatMessages(roomCode).subscribe({
+        next: (messages) => {
+          console.log('Initial chat messages fetched:', messages);
+          this.chatMessages = messages.map((message) => {
+            if (message.sender === sessionStorage.getItem('myTeamName') && this.isHost && !message.sender.includes('(Host)')) {
+              message.sender += ' (Host)';
+            }
+            return message;
+          });
+        },
+        error: (err) => {
+          console.error('Failed to fetch chat messages:', err);
+        }
+      });
+    }
   }
 
   fetchBidsFromBackend() {
@@ -222,14 +246,14 @@ export class LandingpageOnlineComponent {
     });
   }
   isSpectator(): boolean {
-  return sessionStorage.getItem('isSpectator') === 'true';
-}
+    return sessionStorage.getItem('isSpectator') === 'true';
+  }
 
   canEditTeam(team: TeamData): boolean {
-    if(this.isSpectator()) return false;
+    if (this.isSpectator()) return false;
     const myTeamName = sessionStorage.getItem('myTeamName');
-    if(!myTeamName) return false; 
-    return team.name===myTeamName;
+    if (!myTeamName) return false;
+    return team.name === myTeamName;
   }
 
   canLock(): boolean {
@@ -358,22 +382,55 @@ export class LandingpageOnlineComponent {
 
     // Wait for animation(yellow or green for incorrect or correct ), then apply balance change and reset UI
     setTimeout(() => {
-      if (correct) {
-        team.balance += bidAmount;
-      } else {
-        team.balance -= bidAmount;
+      if (!team.id) {
+        return;
       }
+      const currentBalance = team.balance;
+      const newBalance = correct ? currentBalance + bidAmount : currentBalance - bidAmount;
+      this.isLoading = true;
+      this.loadingMessage = 'Updating balance...';
+      this.bidSignalR.updateTeamBalance(team.id, newBalance).subscribe({
+        next: (updatedTeam: any) => {
+          const index = this.teams.findIndex(t => t.id === team.id);
 
-      this.teams.forEach((t: TeamData) => t.currentBid = 0);
-      this.isGameLocked = false;
-      this.activeTeam = null;
-      if (this.roundTimer) {
-        this.roundTimer.reset();
-      }
+          this.teams[index] = {
+            ...this.teams[index],
+            balance: Number(updatedTeam.balance ?? updatedTeam.Balance)
+          };
 
-      this.isProcessingResult = false;
-      this.hasPlayedAtLeastOneRound = true;
+          // reset bids
+          this.teams.forEach(t => t.currentBid = 0);
+
+          // rebuild visible list
+          this.filteredTeams = this.getVisibleTeams();
+
+          // game state reset
+          this.isGameLocked = false;
+          this.activeTeam = null;
+
+          if (this.roundTimer) {
+            this.roundTimer.reset();
+          }
+
+          this.isProcessingResult = false;
+          this.hasPlayedAtLeastOneRound = true;
+          this.isLoading = false;
+
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Failed to update team balance:', err);
+          this.showToaster('Failed to update team balance. Please try again.');
+          this.isLoading = false;
+          this.isProcessingResult = false;
+        }
+      });
     }, 3000);
+  }
+  private refreshTeams() {
+    this.teams = [...this.teams];
+    this.filteredTeams = this.getVisibleTeams();
+    this.cdr.detectChanges();
   }
 
   private _setResultState(teamId: string, state: 'correct' | 'wrong') {
@@ -384,9 +441,13 @@ export class LandingpageOnlineComponent {
   }
 
   showWinner() {
+    // Exclude the host's team from the winner calculation
+    const hostTeamId = sessionStorage.getItem('hostTeamId');
+    const nonHostTeams = this.teams.filter((team) => team.teamId !== hostTeamId);
+
     // Find team with max balance (the actual winner of the game)
-    let maxBalance = Math.max(...this.teams.map((t: TeamData) => t.balance));
-    let winners = this.teams.filter((t: TeamData) => t.balance === maxBalance);
+    let maxBalance = Math.max(...nonHostTeams.map((t: TeamData) => t.balance));
+    let winners = nonHostTeams.filter((t: TeamData) => t.balance === maxBalance);
     this.winnerTeam = winners.length > 0 ? winners[0] : null;
     this.winnerModalOpen = true;
   }
@@ -424,52 +485,61 @@ export class LandingpageOnlineComponent {
   }
 
   // Toggles the chat dropdown visibility
-toggleChatDropdown() {
-  this.isChatOpen = !this.isChatOpen;
-}
+  toggleChatDropdown() {
+    this.isChatOpen = !this.isChatOpen;
+  }
 
-// Sends a new chat message
-sendMessage() {
-  if (this.newChatMessage.trim()) {
-    const roomCode = sessionStorage.getItem('roomCode');
-    if (!roomCode) {
-      console.error('Room code not found. Cannot send message.');
-      return;
+  // Sends a new chat message
+  sendMessage() {
+    if (this.newChatMessage.trim()) {
+      const roomCode = sessionStorage.getItem('roomCode');
+      if (!roomCode) {
+        console.error('Room code not found. Cannot send message.');
+        return;
+      }
+
+      let senderName = sessionStorage.getItem('myTeamName') || 'Unknown';
+      if (this.isHost) {
+        senderName += ' (Host)'; // Append "(Host)" if the sender is the host
+      }
+
+      const message = {
+        roomCode,
+        sender: senderName,
+        text: this.newChatMessage.trim()
+      };
+
+      this.chatMessages.push(message);
+      this.newChatMessage = '';
+
+      // Send message via SignalR and HTTP
+      this.bidSignalR.sendChatMessage(message);
     }
-
-    const message = {
-      roomCode,
-      sender: sessionStorage.getItem('myTeamName') || 'Unknown',
-      text: this.newChatMessage.trim()
-    };
-
-    this.chatMessages.push(message);
-    this.newChatMessage = '';
-
-    // Send message via SignalR and HTTP
-    this.bidSignalR.sendChatMessage(message);
   }
-}
 
-// Add event listener for Enter key to send chat message
-onChatInputKeydown(event: KeyboardEvent) {
-  if (event.key === 'Enter') {
-    this.sendMessage();
-    event.preventDefault(); // Prevent default Enter behavior
+  // Add event listener for Enter key to send chat message
+  onChatInputKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.sendMessage();
+      event.preventDefault(); // Prevent default Enter behavior
+    }
   }
-}
 
-getGridColumns(teamCount: number): string {
-  if (teamCount <= 2) {
-    return 'repeat(2, 1fr)';
-  } else if (teamCount === 3) {
-    return 'repeat(3, 1fr)';
-  } else {
-    return 'repeat(auto-fit, minmax(200px, 1fr))';
+  getGridColumns(teamCount: number): string {
+    if (teamCount <= 2) {
+      return 'repeat(2, 1fr)';
+    } else if (teamCount === 3) {
+      return 'repeat(3, 1fr)';
+    } else {
+      return 'repeat(auto-fit, minmax(200px, 1fr))';
+    }
   }
-}
+  private refreshView() {
+    this.filteredTeams = this.getVisibleTeams();
+    this.cdr.markForCheck(); // safer than detectChanges
+  }
 
-getVisibleTeams(): TeamData[] {
+  getVisibleTeams(): TeamData[] {
     let hostTeamId = sessionStorage.getItem('hostTeamId');
 
     if (!hostTeamId) {

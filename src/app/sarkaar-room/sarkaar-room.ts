@@ -116,8 +116,13 @@ export class SarkaarRoom implements OnDestroy {
     try {
       const result = await this.roomService.joinRoomWithTeamCode(this.code, this.teamName) as { success: boolean; teamCode: string; error?: string };
       if (result.success) {
-        // Store in backend DB
-        await this.roomService.storeTeam(this.teamName, this.code, this.maxBidAmount).toPromise(); // Pass initial balance
+        // Fetch game controls to get the correct maxBidAmount
+        const gameControls: any = await this.roomService.getGameControls(this.code).toPromise();
+        const maxBidAmount = gameControls?.maxBidAmount || 100; // Default to 100 if not found
+
+        // Store in backend DB with the correct balance
+        await this.roomService.storeTeam(this.teamName, this.code, maxBidAmount).toPromise();
+
         // Store room code for later use (for end game)
         sessionStorage.setItem('roomCode', this.code);
         sessionStorage.removeItem('isHost');
@@ -196,39 +201,6 @@ export class SarkaarRoom implements OnDestroy {
     sessionStorage.setItem('isSpectator', 'true');
 
     this.router.navigate(['/sarkaar-online']);
-  }
-
-  
-  async updateTeamBalance(teamName: string, bidAmount: number, isCorrect: boolean) {
-    if (this.connectionState !== 'connected') {
-      alert('Not connected to server. Please wait or try again.');
-      return;
-    }
-
-    const updatePayload = {
-      teamName,
-      bidAmount,
-      isCorrect
-    };
-
-    try {
-      this.isLoading = true;
-      this.loadingMessage = 'Updating team balance...';
-      const updatedBalance = await this.http.post<number>(`${API_BASE}/api/UpdateTeamBalance`, updatePayload).toPromise();
-      console.log(`Balance updated for team: ${teamName}, new balance: ${updatedBalance}`);
-
-      // Update the frontend state with the new balance
-      const teamIndex = this.teams.findIndex(team => team === teamName);
-      if (teamIndex !== -1) {
-        this.teams[teamIndex] = `${teamName} (Balance: ${updatedBalance})`;
-      }
-    } catch (err) {
-      console.error('Failed to update team balance:', err);
-      alert('Failed to update team balance. Please try again.');
-    } finally {
-      this.isLoading = false;
-      this.loadingMessage = '';
-    }
   }
 
 }
