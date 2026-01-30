@@ -178,9 +178,13 @@ export class LandingpageOnlineComponent {
       }
 
       // Start SignalR connection for real-time updates
-      const gameId = bids[0]?.gameId;
-      if (gameId) {
-        this.bidSignalR.startConnection(gameId);
+      // const gameId = bids[0]?.gameId;
+      // if (gameId) {
+      //   this.bidSignalR.startConnection(gameId);
+      // }
+      const roomCode = sessionStorage.getItem('roomCode');
+      if (roomCode) {
+        this.bidSignalR.startConnection(roomCode);
       }
     });
 
@@ -313,9 +317,10 @@ export class LandingpageOnlineComponent {
         this.isLoading = false; // Hide loader on error
       },
       next: () => {
+        const roomCode = sessionStorage.getItem('roomCode');
         // Broadcast bid via SignalR for real-time update
         this.bidSignalR.sendBid({
-          gameId: team.gameId ?? 0,
+          roomCode: roomCode!,
           teamId: team.id!,
           amount
         });
@@ -509,7 +514,7 @@ export class LandingpageOnlineComponent {
         text: this.newChatMessage.trim()
       };
 
-      this.chatMessages.push(message);
+      // this.chatMessages.push(message);
       this.newChatMessage = '';
 
       // Send message via SignalR and HTTP

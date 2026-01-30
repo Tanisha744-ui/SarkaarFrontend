@@ -15,13 +15,17 @@ export class BidSignalRService {
 
   constructor(private ngZone: NgZone, private http: HttpClient) { }
 
-  startConnection(gameId: number) {
-    if (this.hubConnection) return;
+  startConnection(roomCode: string) {
+    if (this.hubConnection) {
+    this.hubConnection.invoke('JoinGameGroup', roomCode);
+    return;
+  }
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl('https://triogamebackend.onrender.com/sarkaarRoomHub')
       .withAutomaticReconnect()
       .build();
-    this.hubConnection.on('BidReceived', (data: any) => {
+    this.hubConnection.on('BidReceived', (data) => {
+      console.log('SignalR BidReceived:', data);
       this.ngZone.run(() => {
         this.bidReceivedSubject.next(data);
       });
@@ -33,7 +37,7 @@ export class BidSignalRService {
       });
     });
     this.hubConnection.start()
-      .then(() => this.hubConnection!.invoke('JoinGameGroup', gameId.toString()))
+      .then(() => this.hubConnection!.invoke('JoinGameGroup', roomCode))
       .catch(err => console.error('SignalR connection error:', err));
   }
 
@@ -43,9 +47,9 @@ export class BidSignalRService {
       this.hubConnection = null;
     }
   }
-  sendBid(bid: { gameId: number, teamId: number, amount: number }) {
+  sendBid(bid: { roomCode: string, teamId: number, amount: number }) {
     if (!this.hubConnection) return;
-    this.hubConnection.invoke('SendBid', bid.gameId, bid.teamId, bid.amount)
+    this.hubConnection.invoke('SendBid', bid.roomCode, bid.teamId, bid.amount)
       .catch(err => console.error('SignalR sendBid error:', err));
   }
   sendChatMessage(message: { roomCode: string; sender: string; text: string }) {
