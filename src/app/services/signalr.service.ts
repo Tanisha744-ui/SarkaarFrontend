@@ -76,7 +76,7 @@ export class SignalRService {
   async startConnection(): Promise<void> {
     if (this.connectionStarted) return;
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5046/partyHub')
+      .withUrl('https://triogamebackend.onrender.com/partyHub')
       .withAutomaticReconnect()
       .build();
     await this.hubConnection.start().then(() => {
