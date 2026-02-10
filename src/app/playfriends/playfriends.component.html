@@ -1,0 +1,223 @@
+<!-- Font Awesome for speaker icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<!-- Banner Notification -->
+<div *ngIf="showBanner" class="banner" role="alert" aria-live="assertive">
+  <div class="banner-title">{{ bannerBold }}</div>
+  <div class="banner-subtitle">{{ bannerMessage }}</div>
+</div>
+<div class="party-container">
+
+  <!-- Party Room Header Section -->
+  <div class="party-room-header rounded-lg border bg-card text-card-foreground shadow-sm mb-4">
+    <div class="space-y-1.5 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div>
+        <div class="font-semibold tracking-tight text-3xl">Tambola Party Room</div>
+        <div class="text-sm text-muted-foreground">Invite friends with this Party Code!</div>
+      </div>
+      <div class="flex items-center gap-2 bg-muted p-2 rounded-lg">
+        <span class="text-sm font-medium text-muted-foreground">PARTY CODE</span>
+        <div
+          class="inline-flex items-center rounded-full border px-2.5 py-0.5 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 text-lg font-bold tracking-widest">
+          {{ partyCode }}</div>
+        <button
+          class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 p-0"
+          aria-label="Copy Party Code" (click)="copyPartyCode()">
+          <i class="fas fa-clipboard fa-lg" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;"></i>
+        </button>
+        
+      </div>
+      <div class="flex items-center gap-2 bg-muted p-2 rounded-lg game-status-section">
+        <span class="text-sm font-medium text-muted-foreground">STATUS</span>
+        <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 text-lg font-bold tracking-widest">
+          {{ status }}
+        </div>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <!-- <button
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 gradient-btn"
+          (click)="goToHostOrJoin()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-house mr-2">
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+            <path
+              d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z">
+            </path>
+          </svg>
+        </button> -->
+        <ng-container *ngIf="isHost; else leavePartyBtn">
+          <button
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 gradient-btn"
+            (click)="togglePartyLock()">
+            <svg *ngIf="!partyLocked" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-lock-open mr-2">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+            </svg>
+            <svg *ngIf="partyLocked" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-lock mr-2">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <!-- {{ partyLocked ? 'Locked' : 'Unlocked' }} -->
+          </button>
+          <button
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 px-4 py-2"
+            type="button" (click)="openEndGameDialog()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-trash2 mr-2">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+              <line x1="10" x2="10" y1="11" y2="17"></line>
+              <line x1="14" x2="14" y1="11" y2="17"></line>
+            </svg>
+            
+          </button>
+        </ng-container>
+        <ng-template #leavePartyBtn>
+          <button
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 px-4 py-2"
+            type="button" (click)="openLeavePartyDialog()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-log-out mr-2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" x2="9" y1="12" y2="12"></line>
+            </svg>
+            Leave Party
+          </button>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Tambola Main Matrix (Number Grid) -->
+<div class="parent-container">
+  <div class ="tambola-section">
+    <div class="tambola-ticket-container" *ngIf="tambolaTickets[playerName]">
+      <h3>Your Tambola Ticket</h3>
+      <table class="tambola-ticket">
+        <tbody>
+          <tr *ngFor="let row of tambolaTickets[playerName]; let rowIdx = index">
+            <td *ngFor="let num of row; let colIdx = index" [class.marked]="markedNumbers[playerName][rowIdx][colIdx]"
+              [class.blank]="num === 0" (click)="toggleMark(rowIdx, colIdx)">
+              {{ num !== 0 ? num : '' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Reward Options Card -->
+    <div class="bonus-card" *ngIf="isGameStarted">
+      <h3>Reward Options</h3>
+      <div class="bonus-buttons">
+        <button class="bonus-button" (click)="onbonusButtonClick('firstLine')" [disabled]="disabledButtons['firstLine']">First Line</button>
+        <button class="bonus-button" (click)="onbonusButtonClick('secondLine')" [disabled]="disabledButtons['secondLine']">Second Line</button>
+        <button class="bonus-button" (click)="onbonusButtonClick('thirdLine')" [disabled]="disabledButtons['thirdLine']">Third Line</button>
+        <button class="bonus-button" (click)="onbonusButtonClick('fullHouse')" [disabled]="disabledButtons['fullHouse']">Full House</button>
+        <button class="bonus-button" (click)="onbonusButtonClick('earlyFive')" [disabled]="disabledButtons['earlyFive']">Early Five</button>
+      </div>
+    </div>
+    <div class="tambola-matrix-container">
+      <h3>Tambola Number Grid</h3>
+      <div class="tambola-matrix">
+        <div *ngFor="let n of [].constructor(90); let i = index" class="tambola-matrix-cell"
+          [class.generated]="randomNumbers.includes(i + 1)"
+          [class.current]="randomNumbers.length > 0 && randomNumbers[randomNumbers.length - 1] === i + 1">
+          {{ i + 1 }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Tambola Ticket Display for Current Player -->
+  <div class="game-section">
+    <!-- Game Controls Card (from tambola-game) visible to host only -->
+    <div class="game-controls-card" *ngIf="isHost">
+      <h3>Game Controls</h3>
+      <div class="game-control">
+        <button *ngIf="!isGameStarted" (click)="startNewGame()" class="start-game">Start New Game</button>
+        <!-- <button *ngIf="isGameStarted" (click)="restartGame()" class="restart-game">Restart Game</button> -->
+        <div *ngIf="showAutoCall">
+          <button *ngIf="autoCallEnabled && !autoCallPaused" (click)="toggleAutoCall()" class="pause-button">
+            <span>&#10074;&#10074;</span> Pause
+          </button>
+          <button *ngIf="autoCallEnabled && autoCallPaused" (click)="toggleAutoCall()" class="resume-button">
+            <span>&#9654;</span> Resume
+          </button>
+          <button *ngIf="!autoCallEnabled" (click)="generateRandomNumber()" class="call-next">Call Next Number</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Number Card (from tambola-game) -->
+    <div class="current-number-card">
+      <div class="current-number-header">
+        <h3>Current Number</h3>
+        <button class="speaker-icon-button speaker" (click)="toggleSpeakerMode()" [attr.aria-label]="speakerModeEnabled ? 'Mute Speaker' : 'Unmute Speaker'">
+          <i *ngIf="speakerModeEnabled" class="fas fa-volume-up"></i>
+          <i *ngIf="!speakerModeEnabled" class="fas fa-volume-mute"></i>
+        </button>
+      </div>
+      <div class="current-number" [ngClass]="{'active': randomNumbers.length > 0}">
+        {{ currentNumber }}
+      </div>
+    </div>
+
+    <!-- Called Numbers Card (from tambola-game) -->
+    <div class="called-numbers-card">
+      <h3>Called Numbers</h3>
+      <p>{{ randomNumbers.length }} / 90 numbers called</p>
+      <div class="called-numbers-list">
+        <span *ngIf="randomNumbers.length === 0" class="no-numbers">No numbers called yet.</span>
+        <ng-container *ngFor="let row of getCalledNumberRows()">
+          <div class="called-numbers-row">
+            <span *ngFor="let number of row" class="called-number">{{ number }}</span>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Players Card: Real-time joined players -->
+    <div class="game-controls-card players-card">
+      <h3>Players ({{ players.length }})</h3>
+      <div class="players-list-2col">
+        <div *ngFor="let row of getPlayerRows()" class="players-row">
+          <div *ngFor="let player of row" class="player-item" [ngClass]="{'current-player': player === playerName, 'host-player': player === hostName}">
+            <span class="player-avatar">{{ player.charAt(0) | uppercase }}</span>
+            <span class="player-name">{{ player }}</span>
+            <span *ngIf="player === hostName" class="host-badge">Host</span>
+            <span *ngIf="player === playerName" class="you-badge">You</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Winners Board Card: Claimed bonuses -->
+    <div class="game-controls-card winners-board-card">
+      <h3>Winners board 🏆</h3>
+      <div class="winners-list">
+        <ng-container *ngIf="claimedbonuses && (objectKeys(claimedbonuses).length > 0); else noWinners">
+          <div *ngFor="let bonus of objectKeys(claimedbonuses)" class="winner-row">
+            <span class="bonus-name">{{ bonusNameMap[bonus] || bonus }}</span>
+            <span class="player-item winner-player"
+                  [ngClass]="{'current-player': claimedbonuses[bonus] === playerName, 'host-player': claimedbonuses[bonus] === hostName}">
+              <span class="player-avatar">{{ claimedbonuses[bonus]?.charAt(0) | uppercase }}</span>
+              <span class="player-name">{{ claimedbonuses[bonus] }}</span>
+              <span *ngIf="claimedbonuses[bonus] === playerName" class="you-badge">You</span>
+            </span>
+          </div>
+        </ng-container>
+        <ng-template #noWinners>
+          <div class="no-winners">No Rewards claimed yet.</div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,150 @@
+/* Go to Lobby button styles */
+.go-lobby-btn-row {
+	display: flex;
+	justify-content: center;
+	margin-top: 32px;
+}
+
+.go-lobby-btn {
+	background: linear-gradient(90deg, #00c6fb 0%, #005bea 100%);
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	padding: 12px 32px;
+	font-size: 1.1em;
+	font-weight: 600;
+	cursor: pointer;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+	transition: background 0.2s, transform 0.2s;
+}
+
+.go-lobby-btn:hover {
+	transform: translateY(-2px) scale(1.03);
+}
+
+.winners-dialog-container {
+	padding: 32px 40px 32px 40px;
+	min-width: 420px;
+	max-width: 700px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.winners-board-card {
+	background: none;
+	border-radius: 0;
+	box-shadow: none;
+	padding: 0;
+	min-width: unset;
+	max-width: unset;
+	width: 100%;
+	margin: 0;
+}
+
+.game-over-heading {
+	text-align: center;
+	font-size: 2.2em;
+	font-weight: bold;
+	color: #ff5252;
+	margin-bottom: 18px;
+	letter-spacing: 1px;
+	margin-top: 0;
+}
+
+.winners-board-card h3 {
+	text-align: center;
+	margin-top: 0px;
+	margin-bottom: 18px;
+	font-size: 1.3em;
+	color: #fff;
+}
+
+.winners-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	align-items: center;
+	margin-top: 10px;
+	max-height: none;
+	overflow: visible;
+}
+
+.winner-row {
+	display: flex;
+	flex-direction: row;
+	gap: 14px;
+	background: rgba(30, 34, 60, 0.8);
+	border-radius: 8px;
+	padding: 10px 22px;
+	color: #fff;
+	font-weight: 500;
+	min-width: 200px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.13);
+	align-items: center;
+	font-size: 1.1em;
+}
+
+.winner-player {
+	display: flex;
+	align-items: center;
+}
+
+.bonus-name {
+	font-weight: bold;
+	color: #00c6fb;
+	margin-right: 10px;
+}
+
+.player-avatar {
+	background: linear-gradient(90deg, #00c6fb 0%, #7f53ac 100%);
+	color: #fff;
+	border-radius: 50%;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.1em;
+	margin-right: 8px;
+	font-weight: bold;
+}
+
+.player-name {
+	color: #fff;
+	font-weight: 500;
+}
+
+/* --- Winner Row Modern Layout --- */
+.winner-row {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	background: rgba(30, 34, 60, 0.85);
+	border-radius: 8px;
+	padding: 12px 32px;
+	color: #fff;
+	font-weight: 500;
+	min-width: 340px;
+	max-width: 600px;
+	width: 90%;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.13);
+	font-size: 1.13em;
+	margin-bottom: 8px;
+}
+
+.bonus-name {
+	font-weight: bold;
+	color: #00c6fb;
+	margin-right: 10px;
+	flex: 1 1 0;
+	text-align: left;
+}
+
+.winner-player {
+	display: flex;
+	align-items: center;
+	flex: 1 1 0;
+	justify-content: flex-end;
+	gap: 8px;
+}

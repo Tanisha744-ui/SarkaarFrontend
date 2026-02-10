@@ -1,0 +1,23 @@
+<h2>Multiplayer Tambola Game – Play Tambola Online with Friends</h2>
+<div *ngIf="showBanner" class="banner" role="alert" aria-live="assertive">
+  <div class="banner-title">{{ bannerBold }}</div>
+  <div class="banner-subtitle">{{ bannerMessage }}</div>
+</div>
+<div class="host-or-join">
+  <div class="cards-container">
+    <div class="card">
+      <h3>Host a new Party</h3>
+      <p class="subtle">Create a new game room and invite your friends to play in real-time.</p>
+      <button (click)="hostParty()" class="host-button">Host Game</button>
+    </div>
+    <div class="card">
+      <h3>Join Party</h3>
+      <p class="subtle">Enter the Party Code from a friend to join their game.</p>
+      <div class="join-input-container">
+        <input type="text" [(ngModel)]="partyCodeInput" placeholder="Enter Party Code" class="party-code-input" />
+        <button (click)="joinParty()" class="join-button">Join</button>
+      </div>
+    </div>
+  </div>
+  <p class="playing-as">Playing as : <span class="player-name">{{ playerName }}</span></p>
+</div>

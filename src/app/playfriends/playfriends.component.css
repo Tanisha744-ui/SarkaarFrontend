@@ -1,0 +1,906 @@
+/* Winners Board Card Styles */
+.winners-board-card {
+  margin-top: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  min-width: 320px;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.winners-board-card h3 {
+  text-align: center;
+  margin-top: 0px;
+  margin-bottom: 10px;
+  font-size: 1.3em;
+  color: #fff;
+}
+.winners-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  margin-top: 25px;
+}
+.winner-row {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  background: rgba(30, 34, 60, 0.7);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: #fff;
+  font-weight: 500;
+  min-width: 180px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  margin-bottom: 0px;
+  align-items: center;
+}
+
+.winner-player {
+  display: flex;
+  align-items: center;
+}
+
+.bonus-name {
+  font-weight: bold;
+  color: #00c6fb;
+  margin-right: 8px;
+}
+.claimer-name {
+  color: #fff;
+}
+.no-winners {
+  color: #ccc;
+  font-style: italic;
+  margin-top: 8px;
+}
+/* Floating banner for game start (same as host-or-join) */
+.banner-title {
+  font-weight: 600;
+  font-size: 1.08em;
+}
+.banner-subtitle {
+  color: #bbb;
+  font-size: 0.98em;
+  margin-top: 2px;
+}
+.banner {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  background: #222;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 14px 28px;
+  min-width: 280px;
+  min-height: 44px;
+  letter-spacing: 0.2px;
+  z-index: 1000;
+  animation: fadeInBanner 0.4s;
+  gap: 2px;
+}
+@keyframes fadeInBanner {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* --- Speaker/Current Number Card Styles (from tambola-game) --- */
+.current-number-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px;
+  margin-top: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  min-height: 110px;
+}
+.current-number-card h3 {
+  margin-top: 0;
+  font-size: 1.5em;
+  color: #fff;
+}
+.current-number {
+  font-size: 1em;
+  color: #ccc;
+  margin-top: 5px;
+  transition: font-size 0.3s, color 0.3s;
+}
+.current-number.active {
+  animation: blink 1s infinite;
+  font-size: 4em;
+  color: #2295f4;
+  min-height: 30px;
+  max-height: 30px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+.current-number-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+.speaker-icon-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1em;
+  color: #007bff;
+  transition: color 0.3s;
+  margin-top: -4px;
+  margin-left: 1px;
+}
+.speaker-icon-button:hover {
+  color: #0056b3;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+/* bonus Card Styles (copied from tambola-game) */
+.bonus-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0px auto;
+  padding: 15px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  width: 700px;
+  max-height: 200px;
+  margin-top: 20px;
+  margin-bottom: -10px;
+}
+.bonus-card h3 {
+  font-size: 1.5em;
+  color: white;
+  margin-bottom: 25px;
+  margin-top: 15px;
+}
+.bonus-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+.bonus-button {
+  padding: 12px 30px;
+  font-size: 1.05em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s, transform 0.2s;
+}
+.bonus-button:disabled {
+  background: #cccccc !important;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.bonus-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+.players-card {
+  margin-top: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+}
+.players-card h3 {
+  text-align: center;
+  margin-top: 0px;
+  margin-bottom: 10px;
+  font-size: 1.3em;
+  color: #fff;
+}
+.players-list-2col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+  align-items: center;
+}
+.players-row {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+.player-item {
+  display: flex;
+  align-items: center;
+  background: rgba(30, 34, 60, 0.7);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: #fff;
+  font-weight: 500;
+  min-width: 120px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  position: relative;
+  margin-bottom: 8px;
+}
+.player-avatar {
+  background: linear-gradient(90deg, #00c6fb 0%, #7f53ac 100%);
+  color: #fff;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-right: 10px;
+}
+.player-name {
+  font-size: 1em;
+  margin-right: 8px;
+}
+.host-badge {
+  background: #7f53ac;
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.85em;
+  margin-left: 4px;
+}
+.you-badge {
+  background: #00c6fb;
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.85em;
+  margin-left: 4px;
+}
+.current-player {
+  border: 2px solid #00c6fb;
+}
+.host-player {
+  border: 2px solid #7f53ac;
+}
+.party-lock-banner {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 9999;
+  background: #222;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  padding: 18px 32px 18px 32px;
+  min-width: 220px;
+  font-size: 1.1em;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  opacity: 0;
+  transform: translate(100px, 40px) scale(0.95);
+  animation: partyBannerInOut 3s cubic-bezier(0.4,0,0.2,1) forwards;
+  box-sizing: border-box;
+}
+@keyframes partyBannerInOut {
+  0% {
+    opacity: 0;
+    transform: translate(100px, 40px) scale(0.95);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(0px, 0px) scale(1.03);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(0px, 0px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(100px, 40px) scale(0.95);
+  }
+}
+.banner-content {
+  width: 100%;
+  position: relative;
+  min-height: 40px;
+  padding-top: 8px;
+  padding-right: 40px;
+}
+.banner-bold {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: 4px;
+}
+.banner-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: #ccc;
+  border: none;
+  color: #fff;
+  font-size: 1.5em;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s, background 0.2s;
+  z-index: 10000;
+  line-height: 1;
+  text-align: center;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.banner-close:hover {
+  opacity: 1;
+  background: rgba(255,255,255,0.1);
+}
+.called-numbers-row {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 2px;
+  max-width: 100%;
+  justify-content: center;
+}
+/* Tambola Game Controls, Current Number, and Called Numbers styles copied from tambola-game.css */
+.game-controls-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  min-height: 130px;
+}
+.game-controls-card h3 {
+  text-align: center;
+  margin-top: 0px;
+  margin-bottom: -5px;
+  font-size: 1.5em;
+  color: #fff;
+}
+.game-control {
+  margin-top: 20px;
+  text-align: center;
+}
+.start-game {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #4caf50;
+  color: white;
+  transition: background-color 0.3s;
+  min-width: 140px;
+  padding: 12px 24px;
+  margin-top: 12px;
+}
+.start-game:hover {
+  background-color: #45a049;
+}
+.restart-game {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background: red;
+  color: white;
+  transition: background-color 0.3s;
+  margin-left: 10px;
+  min-width: 140px;
+  padding: 10px 24px;
+}
+.restart-game:hover {
+  background-color: rgb(184, 0, 0);
+}
+.pause-button {
+  background-color: red !important;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+.pause-button:hover {
+  background-color: darkred;
+}
+.resume-button {
+  background-color: green !important;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+.resume-button:hover {
+  background-color: darkgreen;
+}
+.call-next {
+  padding: 10px 20px;
+  font-size: 1em;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 12px;
+  margin-left: 10px;
+}
+.call-next:hover {
+  background-color: #0056b3;
+}
+.current-number-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px;
+  margin-top: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  min-height: 110px;
+}
+.current-number-card h3 {
+  margin-top: 0;
+  font-size: 1.5em;
+  color: #fff;
+}
+.current-number {
+  font-size: 1em;
+  color: #ccc;
+  margin-top: 0px;
+  height: 20px;
+  transition: font-size 0.3s, color 0.3s;
+}
+.current-number.active {
+  animation: blink 1s infinite;
+  font-size: 4em;
+  color: #2295f4;
+  min-height: 30px;
+  max-height: 30px;
+  margin-top: -25px;
+  margin-bottom: 0px;
+}
+.called-numbers-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+.called-numbers-card h3 {
+  margin-top: 0;
+  font-size: 1.5em;
+  color: #fff;
+}
+.called-numbers-card p {
+  font-size: 1em;
+  color: #ccc;
+  margin-top: -12px;
+  margin-bottom: 10px;
+}
+.called-numbers-list {
+  display: block;
+  max-height: 75px;
+  min-height: 75px;
+  max-width: 95%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 5px 10px 10px 10px;
+  border-radius: 5px;
+}
+.called-numbers-list::-webkit-scrollbar {
+  width: 7px;
+}
+.called-numbers-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+.called-numbers-list::-webkit-scrollbar-thumb {
+  background-color: #6b6666;
+  border-radius: 5px;
+}
+.called-number {
+  display: inline-block;
+  margin: 5px 8px 5px 0;
+  padding: 5px 8px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 20px;
+  font-size: 1em;
+  flex: 0 0 auto;
+  vertical-align: top;
+}
+.called-numbers-list .no-numbers {
+  display: block;
+  text-align: center;
+  color: #ccc;
+  margin: 10px 0;
+}
+.current-number-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+.speaker-icon-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1em;
+  color: #007bff;
+  transition: color 0.3s;
+  margin-top: -4px;
+  margin-left: 1px;
+}
+.speaker-icon-button:hover {
+  color: #0056b3;
+}
+
+/* Tambola Ticket Styles */
+.tambola-ticket-container {
+  margin-top: 2rem;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
+  padding: 1px;
+  padding-bottom: 35px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12), 0 1.5px 4px rgba(0,0,0,0.08);
+  margin: 2rem auto 0 auto;
+  width: 730px;
+}
+.tambola-ticket {
+  height: 140px;
+  width: 400px;
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+.tambola-ticket-container h3 {
+  color: #fff;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  font-size: 1.5rem;
+}
+.tambola-ticket td {
+  width: 36px;
+  height: 36px;
+  border: 2px solid black;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 1.2rem;
+  cursor: pointer;
+  background: #fff;
+  color: black;
+  border-radius: 4px;
+  font-weight:bold;
+  transition: background 0.2s, color 0.2s;
+}
+.tambola-ticket td.blank {
+  background: #f0f0f0;
+  cursor: default;
+}
+.tambola-ticket td.marked {
+  background: #4caf50;
+  color: #fff;
+  font-weight: bold;
+}
+.tambola-matrix-container {
+  margin: 2rem 2rem 2rem 2rem;
+  width: 700px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  padding: 24px 16px 32px 16px;
+  text-align: center;
+}
+.tambola-matrix-container h3 {
+  color: #fff;
+  margin-top: 8px ;
+  margin-bottom: 30px;
+  font-size: 1.5rem;
+}
+.tambola-matrix {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 12px;
+  margin: 0 auto;
+  max-width: 700px;
+}
+.tambola-matrix-cell {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  background-color: #e1f8fe;
+  color: #000;
+  font-size: 1.3em;
+  font-weight: 500;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.tambola-matrix-cell.generated {
+  background-color: #4caf50;
+  color: white;
+}
+.tambola-matrix-cell.current {
+  background: linear-gradient(145deg, #2196F3, #bf4cc9);
+  color: white;
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0.5;
+  }
+}
+.party-container {
+  max-width: 95%;
+  margin: 30px auto;
+  padding: 2px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+/* Party Room Header Section Styling */
+.party-room-header {
+  max-width: 100%;
+  background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
+  color: white;
+  border-radius: 16px;
+}
+.party-room-header .font-semibold {
+  font-weight: 600;
+  color: white;
+
+}
+.party-room-header .tracking-tight {
+  letter-spacing: -0.01em;
+}
+.party-room-header .text-3xl {
+  font-size: 2rem;
+}
+.party-room-header .text-muted-foreground {
+  color: #6b7280;
+}
+.party-room-header .bg-muted {
+  background: #f9fafb;
+}
+.party-room-header .bg-card {
+  background: #fff;
+}
+.party-room-header .text-card-foreground {
+  color: #222;
+}
+.party-room-header .bg-secondary {
+  background: #e0e7ff;
+}
+.party-room-header .text-secondary-foreground {
+  color: #3730a3;
+}
+.party-room-header .hover\:bg-secondary\/80:hover {
+  background: #c7d2fe;
+}
+.party-room-header .rounded-lg {
+  border-radius: 16px;
+}
+.party-room-header .rounded-full {
+  border-radius: 9999px;
+}
+.party-room-header .border {
+  border: 1px solid #e5e7eb;
+}
+.party-room-header .shadow-sm {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.party-room-header .mb-4 {
+  margin-bottom: 1rem;
+}
+.party-room-header .p-6 {
+  padding: 1.5rem;
+}
+.party-room-header .flex {
+  display: flex;
+}
+.party-room-header .flex-col {
+  flex-direction: column;
+}
+.party-room-header .md\:flex-row {
+  flex-direction: row;
+}
+.party-room-header .items-start {
+  align-items: flex-start;
+}
+.party-room-header .md\:items-center {
+  align-items: center;
+}
+.party-room-header .justify-between {
+  justify-content: space-between;
+}
+.party-room-header .gap-4 {
+  gap: 1rem;
+}
+.party-room-header .gap-2 {
+  gap: 0.5rem;
+}
+.party-room-header .p-2 {
+  padding: 0.5rem;
+}
+.party-room-header .text-sm {
+  font-size: 0.875rem;
+}
+.party-room-header .font-medium {
+  font-weight: 500;
+}
+.party-room-header .px-2\.5 {
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+}
+.party-room-header .py-0\.5 {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+.party-room-header .text-lg {
+  font-size: 1.125rem;
+}
+.party-room-header .tracking-widest {
+  letter-spacing: 0.1em;
+}
+.party-room-header .inline-flex {
+  display: inline-flex;
+}
+.party-room-header .items-center {
+  align-items: center;
+}
+.party-room-header .border-transparent {
+  border-color: transparent;
+}
+.party-room-header .transition-colors {
+  transition: background 0.2s, color 0.2s;
+}
+.party-room-header .focus\:outline-none:focus {
+  outline: none;
+}
+.party-room-header .focus\:ring-2:focus {
+  box-shadow: 0 0 0 2px #6366f1;
+}
+.party-room-header .focus\:ring-ring:focus {
+  box-shadow: 0 0 0 2px #6366f1;
+}
+.party-room-header .focus\:ring-offset-2:focus {
+  box-shadow: 0 0 0 4px #6366f1;
+}
+.party-room-header .border-input {
+  border: 1px solid #d1d5db;
+}
+.party-room-header .bg-background {
+  background: #ccc;
+}
+.party-room-header .hover\:bg-accent:hover {
+  background: #f1f5f9;
+}
+.party-room-header .hover\:text-accent-foreground:hover {
+  color: #222;
+}
+.party-room-header .h-10 {
+  height: 2.5rem;
+}
+.party-room-header .w-10 {
+  width: 2.5rem;
+}
+.party-room-header .px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.party-room-header .py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.party-room-header .bg-destructive {
+  background: #ef4444;
+}
+.party-room-header .text-destructive-foreground {
+  color: #fff;
+}
+.party-room-header .hover\:bg-destructive\/90:hover {
+  background: #dc2626;
+}
+.party-room-header .mr-2 {
+  margin-right: 0.5rem;
+}
+.party-room-header .disabled\:pointer-events-none:disabled {
+  pointer-events: none;
+}
+.party-room-header .disabled\:opacity-50:disabled {
+  opacity: 0.5;
+}
+.party-room-header .flex-wrap {
+  flex-wrap: wrap;
+}
+.start-game-btn {
+  margin-top: 20px;
+  padding: 10px 24px;
+  font-size: 1.1em;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.party-room-header .gradient-btn {
+  background: linear-gradient(90deg, #6366f1 0%, #60a5fa 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.10);
+  transition: background 0.2s, color 0.2s;
+}
+.party-room-header .gradient-btn:hover {
+  background: linear-gradient(90deg, #60a5fa 0%, #6366f1 100%);
+  color: #fff;
+  transition: background 0.2s, color 0.2s;
+}
+.parent-container {
+ display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 5px; 
+}
+.tambola-section {
+  margin-top: 10px;
+}
+.game-section {
+  margin-top: 10px;
+  min-width: 400px;
+}
+.parent-container{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  margin-left: -60px;
+  margin-bottom: 50px;
+}
+.game-status-section {
+position: relative;
+
+}

@@ -1,3 +1,9 @@
+.custom-dialog-bg.mat-mdc-dialog-surface, .custom-dialog-bg .mat-mdc-dialog-surface, .custom-dialog-bg.mat-dialog-container, .custom-dialog-bg .mat-dialog-container {
+	background: #41414d !important; /* Darker solid color for better readability */
+	color: #ccc !important;
+	border-radius: 18px !important;
+	box-shadow: 0 6px 22px rgba(0,0,0,0.22);
+}
 html, body {
 	width: 100vw;
 	/* height: 100vh; */

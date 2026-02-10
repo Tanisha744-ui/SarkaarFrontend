@@ -1,0 +1,23 @@
+<div class="winners-dialog-container">
+	<div class="winners-board-card">
+		<h2 class="game-over-heading">Game Over!</h2>
+		<h3>Final Winners 🎉</h3>
+		<div class="winners-list">
+			<ng-container *ngIf="claimedbonuses && (objectKeys(claimedbonuses).length > 0); else noWinners">
+				<div *ngFor="let bonus of objectKeys(claimedbonuses)" class="winner-row">
+					<span class="bonus-name">{{ bonusNameMap[bonus] || bonus }}</span>
+					<span class="player-item winner-player">
+						<span class="player-avatar">{{ claimedbonuses[bonus]?.charAt(0) | uppercase }}</span>
+						<span class="player-name">{{ claimedbonuses[bonus] }}</span>
+					</span>
+				</div>
+			</ng-container>
+			<ng-template #noWinners>
+				<div class="no-winners">No Rewards claimed yet.</div>
+			</ng-template>
+		</div>
+		<div class="go-lobby-btn-row">
+			<button class="go-lobby-btn" (click)="goToLobby()">Go to Lobby</button>
+		</div>
+	</div>
+</div>

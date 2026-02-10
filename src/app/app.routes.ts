@@ -14,6 +14,8 @@ import { SarkaarModeSelect } from './sarkaar-mode-select/sarkaar-mode-select';
 import { SarkaarRoom } from './sarkaar-room/sarkaar-room';
 import { TambolaOnlineComponent } from './tambola-online/tambola-online.component';
 import { LandingpageOnlineComponent } from './landingpage-online/landingpage-online';
+import { HostOrJoinComponent } from './host-or-join/host-or-join.component';
+import { PlayfriendsComponent } from './playfriends/playfriends.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -34,7 +36,9 @@ export const routes: Routes = [
       { path: 'tambola', component: Tambola },
       { path: 'tambola-game', component: TambolaGame },
       { path: 'tambola-online-setup', component: TambolaOnlineComponent },
-      { path: 'tambola-online', component: TambolaOnlineComponent }
+      { path: 'tambola-online', component: TambolaOnlineComponent },
+      { path: 'host-or-join', loadComponent: () => import('./host-or-join/host-or-join.component').then((m) => m.HostOrJoinComponent) },
+      { path: 'playfriends', component: PlayfriendsComponent }
     ]
   }
 ];

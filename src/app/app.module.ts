@@ -5,6 +5,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { App as AppComponent } from './app';
 import { Tambola } from './tambola/tambola';
 import { DialogContent } from './tambola/tambola';
+import { EndGameDialogComponent } from './playfriends/end-game-dialog.component';
 
 
 @NgModule({
@@ -14,7 +15,8 @@ import { DialogContent } from './tambola/tambola';
     MatDialogModule,
     AppComponent,
     Tambola,
-    DialogContent
+    DialogContent,
+    EndGameDialogComponent
   ],
   bootstrap: [AppComponent]
 })

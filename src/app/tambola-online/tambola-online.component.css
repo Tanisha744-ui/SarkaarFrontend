@@ -1,18 +1,21 @@
 .card {
-  font-family: Arial, sans-serif;
-  color: #fff;
-  text-align: center;
-   background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white */
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  max-width: 400px;
-  margin: 50px auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the card in the viewport */
+  background-color: rgba(255, 255, 255, 0.1);
+  width: 500px  ;
 }
 
-.card h2 {
-  font-size: 2.5em;
+.card h3 {
+  font-size: 1.5em;
+  margin-top: 0px;
   margin-bottom: 20px;
+  text-align: center ;
 }
 
 .card form {
@@ -24,8 +27,9 @@
 .card input {
   padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 10px;
   font-size: 1em;
+
 }
 
 .card button {
@@ -33,10 +37,15 @@
   background-color: #0056b3;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
 }
 
 .card button:hover {
   background-color: #003f7f;
+}
+.continue-button {
+  font-size: 1rem; /* Increased font size for the continue button */
+  padding: 10px 20px; /* Adjusted padding for better button size */
+  margin-top: 10px;
 }

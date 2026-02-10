@@ -258,9 +258,8 @@ export class TambolaGame implements OnDestroy, OnInit {
     });
   }
 
-  onBonusOptionClick(option: string) {
-    console.log(`Bonus option selected: ${option}`);
-    this.disabledButtons[option] = true; // Disable the clicked button
-    // Add additional logic for handling the bonus option
+  onbonusOptionClick(option: string) {
+    console.log(`bonus option selected: ${option}`);
+    this.disabledButtons[option] = true; 
   }
 }

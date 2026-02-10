@@ -1,0 +1,148 @@
+.banner-title {
+  font-weight: 600;
+  font-size: 1.08em;
+}
+.banner-subtitle {
+  color: #bbb;
+  font-size: 0.98em;
+  margin-top: 2px;
+}
+/* Professional banner for host-ended event */
+
+.banner {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  background: #222;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 14px 28px;
+  min-width: 280px;
+  min-height: 44px;
+  letter-spacing: 0.2px;
+  z-index: 1000;
+  animation: fadeInBanner 0.4s;
+  gap: 2px;
+}
+
+@keyframes fadeInBanner {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+body {
+  overflow: hidden; /* Disable scrolling */
+}
+
+.host-or-join {
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center align all elements */
+  margin-top: 200px; /* Add spacing below the heading */
+}
+
+.cards-container {
+  display: flex;
+  flex-direction: row; /* Place cards side by side */
+  justify-content: center;
+  gap: 20px; /* Add spacing between the cards */
+}
+
+.card {
+  padding: 30px; /* Increased padding for better spacing */
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+  width: 350px; /* Slightly larger width */
+  height: 150px; /* Set a fixed height for uniformity */
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px; /* Match Game Control card border radius */
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+h2 {
+  text-align: center;
+  margin-top: 50px;
+  margin-bottom: -50px;
+}
+
+.subtle {
+  color: #ccc; /* Subtle gray color */
+  font-size: 1rem; /* Slightly larger font size for subtle text */
+  margin-top: -10px;
+  margin-bottom: 20px; /* Added spacing below subtle text */
+  text-align: center; /* Center align the text */
+}
+.card h3 {
+  margin-top: 0%;
+  color: white;
+  font-size: 1.5rem; /* Enlarged font size for headings */
+  margin-bottom: 15px; /* Added spacing below headings */
+}
+
+.card button {
+  font-size: 1rem; /* Increased font size for buttons */
+  padding: 10px 20px; /* Adjusted padding for better button size */
+}
+
+.join-input-container {
+  display: flex;
+  align-items: center; /* Align input and button vertically */
+  gap: 10px; /* Add spacing between the input field and the button */
+  justify-content: center; /* Center the input and button horizontally */
+}
+
+.party-code-input {
+  text-transform: uppercase; /* Automatically convert input text to uppercase */
+  width: 70%; /* Adjusted width to fit alongside the button */
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.party-code-input::placeholder {
+  text-transform: none; /* Ensure placeholder text remains as entered */
+}
+
+.join-input-container button {
+  font-size: 1rem;
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 10px;
+  transition: background-color 0.2s;
+  margin-bottom: 10px;
+  margin-left: 5px;
+}
+
+.join-input-container button:hover {
+  background-color: #0056b3;
+}
+.host-button {
+margin-top: 5px;
+}
+.player-name {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #ccc; /* Neutral color for better readability */
+  position: relative; /* Ensure it stays below the cards */
+}
+
+.playing-as {
+  margin-top: 150px; /* Add spacing below the cards */
+  text-align: center;
+}
